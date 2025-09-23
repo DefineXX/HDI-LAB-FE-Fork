@@ -1,10 +1,18 @@
 import '@hdi/ui/styles.css';
+
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+
 import './globals.css';
 
 const pretendard = localFont({
-  src: './fonts/PretendardVariable.ttf',
+  src: [
+    {
+      path: './fonts/PretendardVariable.ttf',
+      weight: '100 900',
+      style: 'normal',
+    },
+  ],
   variable: '--font-pretendard',
   display: 'swap',
 });

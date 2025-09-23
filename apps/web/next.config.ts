@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  transpilePackages: ['@hdi/ui'],
+  transpilePackages: ['@hdi/ui', '@hdi/fonts'],
 };
 
 export default nextConfig;

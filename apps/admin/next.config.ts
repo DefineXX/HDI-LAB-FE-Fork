@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ['@hdi/ui', '@hdi/fonts'],
 };
 
 export default nextConfig;
