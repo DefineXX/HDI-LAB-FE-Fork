@@ -1,13 +1,2 @@
 @import 'tailwindcss';
-@import '@repo/tailwind-config';
-
-:root {
-  --text-color: #000000;
-  --background-color: #ffffff;
-}
-
-body {
-  color: var(--text-color);
-  background: var(--background-color);
-  font-family: var(--font-pretendard);
-}
+@import '@hdi/tailwind-config';

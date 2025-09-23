@@ -7,10 +7,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  transpilePackages: ['@repo/ui'],
-  experimental: {
-    optimizePackageImports: ['@repo/ui'],
-  },
+  transpilePackages: ['@hdi/ui'],
 };
 
 export default nextConfig;

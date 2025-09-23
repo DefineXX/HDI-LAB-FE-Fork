@@ -55,7 +55,7 @@ cd packages/ui
 pnpm run dev
 
 # 또는 루트에서
-pnpm --filter @repo/ui run dev
+pnpm --filter @hdi/ui run dev
 ```
 
 ## 📦 빌드 명령어
@@ -65,7 +65,7 @@ pnpm --filter @repo/ui run dev
 pnpm run build
 
 # UI 패키지만 빌드
-pnpm --filter @repo/ui run build
+pnpm --filter @hdi/ui run build
 ```
 
 ## 🎨 스타일 개발
@@ -73,7 +73,7 @@ pnpm --filter @repo/ui run build
 Tailwind CSS 스타일이 `packages/ui/src/styles.css`에 정의되어 있습니다.
 
 - 스타일 변경 시 자동으로 `dist/index.css`로 컴파일됩니다
-- 각 앱에서 `@repo/ui/styles.css`를 import하여 사용합니다
+- 각 앱에서 `@hdi/ui/styles.css`를 import하여 사용합니다
 
 ## 🔧 문제 해결
 
@@ -81,7 +81,7 @@ Tailwind CSS 스타일이 `packages/ui/src/styles.css`에 정의되어 있습니
 
 ```bash
 # UI 패키지 빌드
-pnpm --filter @repo/ui run build
+pnpm --filter @hdi/ui run build
 
 # 또는 전체 빌드
 pnpm run build

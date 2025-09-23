@@ -1,4 +1,4 @@
-import { HongikUnivLogo } from '@repo/ui';
+import { HongikUnivLogo } from '@hdi/ui';
 import Image from 'next/image';
 
 export default function Page() {
@@ -18,7 +18,7 @@ export default function Page() {
         />
         <p className="text-center text-gray-600">
           이 이미지는{' '}
-          <code className="rounded bg-gray-100 px-2 py-1">@repo/ui</code>{' '}
+          <code className="rounded bg-gray-100 px-2 py-1">@hdi/ui</code>{' '}
           패키지에서 공유 에셋으로 관리되고 있습니다.
         </p>
       </div>

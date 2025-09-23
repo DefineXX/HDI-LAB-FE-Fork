@@ -1,5 +1,5 @@
 {
-  "extends": "@repo/typescript-config/nextjs.json",
+  "extends": "@hdi/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [
       {
@@ -7,7 +7,7 @@
       }
     ],
     "paths": {
-      "@repo/ui": ["../../packages/ui/src"]
+      "@hdi/ui": ["../../packages/ui/src"]
     }
   },
   "include": [
