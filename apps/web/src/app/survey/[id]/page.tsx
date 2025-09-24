@@ -1,13 +1,15 @@
 'use client';
 
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 import ProductImage from '@/components/survey/ProductImage';
 import ProductInfo from '@/components/survey/ProductInfo';
 import QualitativeEvaluation from '@/components/survey/QualitativeEvaluation';
 import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyNavigation from '@/components/survey/SurveyNavigation';
 import SurveyQuestion from '@/components/survey/SurveyQuestion';
-import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { loadSurveyProgress, saveSurveyProgress } from '@/utils/survey';
 
 // 임시 데이터 - 실제로는 API에서 가져올 데이터
 const mockSurveyData = {
@@ -43,9 +45,22 @@ const surveyQuestions = [
 export default function SurveyPage() {
   const router = useRouter();
   const { id } = useParams();
+  const surveyId = Array.isArray(id) ? id[0] : id || 'default';
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
+
+  // 설문 진행 상태 불러오기
+  useEffect(() => {
+    if (surveyId) {
+      const progress = loadSurveyProgress(surveyId);
+      if (progress) {
+        setAnswers(progress.questionsAnswered);
+        setQualitativeAnswer(progress.qualitativeAnswer);
+      }
+    }
+  }, [surveyId]);
+
   // 실제로는 params.id를 사용해서 해당 설문 데이터를 가져와야 함
   console.log('Survey ID:', id);
 
@@ -58,13 +73,29 @@ export default function SurveyPage() {
 
   const handleSave = () => {
     console.log('임시저장:', { answers, qualitativeAnswer });
-    // 임시저장 로직 구현
+
+    // 설문 진행 상태 저장
+    if (surveyId) {
+      saveSurveyProgress(surveyId, {
+        questionsAnswered: answers,
+        qualitativeAnswer,
+      });
+    }
   };
 
   const handleComplete = () => {
-    console.log('평가완료:', { answers, qualitativeAnswer });
-    // 평가완료 로직 구현
-    router.push(`/weight-evaluation`);
+    console.log('설문 문항 평가완료:', { answers, qualitativeAnswer });
+
+    // 설문 진행 상태 저장
+    if (surveyId) {
+      saveSurveyProgress(surveyId, {
+        questionsAnswered: answers,
+        qualitativeAnswer,
+      });
+
+      // 가중치 평가 페이지로 이동
+      router.push(`/weight-evaluation`);
+    }
   };
 
   const isAllAnswered = surveyQuestions.every(
