@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import { KEITLogo, MOTIELogo } from '@hdi/ui';
 
-export function FooterLogo({ className }: { className?: string }) {
+export function ResearchPartners({ className }: { className?: string }) {
   return (
     <footer className={clsx('flex items-center gap-12', className)}>
       <Image
