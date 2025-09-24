@@ -10,3 +10,7 @@ body {
   background: var(--background-color);
   font-family: var(--font-pretendard);
 }
+
+button {
+  cursor: pointer;
+}
