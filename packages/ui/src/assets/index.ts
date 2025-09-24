@@ -5,6 +5,7 @@ export { default as HDILabOpenChatQR } from './HDILab-open-chat-qr.png';
 export { default as HongikUnivLogo } from './hongik-univ-logo.png';
 export { default as KEITLogo } from './KEIT-logo.png';
 export { default as MOTIELogo } from './MOTIE-logo.png';
+export { default as ThumbUp } from './thumb-up.png';
 
 // 향후 추가될 에셋들도 여기에 export
 // export { default as SomeOtherAsset } from './some-other-asset.svg';

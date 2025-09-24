@@ -31,3 +31,17 @@ export interface SurveyData {
 }
 
 export type SurveyNavigationAction = 'previous' | 'save' | 'complete' | 'next';
+
+export interface SurveyCompletionStatus {
+  surveyQuestionsCompleted: boolean;
+  weightEvaluationCompleted: boolean;
+  isFullyCompleted: boolean;
+}
+
+export interface SurveyProgress {
+  surveyId: string;
+  questionsAnswered: Record<string, number>;
+  qualitativeAnswer: string;
+  weightEvaluationData?: Record<string, Record<string, number>>;
+  completionStatus: SurveyCompletionStatus;
+}
