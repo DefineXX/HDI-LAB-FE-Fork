@@ -7,12 +7,20 @@ interface ButtonProps {
   onClick: () => void;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
-export function Button({ text, onClick, className, type }: ButtonProps) {
+export function Button({
+  text,
+  onClick,
+  className,
+  type,
+  disabled,
+}: ButtonProps) {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={clsx('rounded-lg py-3.5', className)}
       type={type}
     >
