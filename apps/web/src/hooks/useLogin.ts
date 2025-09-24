@@ -1,7 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
-import { login, LoginRequest, LoginResponse } from '@/services/auth';
+import { LoginRequest, LoginResponse } from '@/schemas/auth';
+import { login } from '@/services/auth';
 import { setCookie } from '@/utils/cookies';
 
 export const useLogin = () => {

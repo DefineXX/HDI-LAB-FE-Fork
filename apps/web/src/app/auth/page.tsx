@@ -8,7 +8,7 @@ import { HongikUnivLogo } from '@hdi/ui';
 import { Button } from '@/components/Button';
 import { Input } from '@/components/Input';
 import { useLogin } from '@/hooks/useLogin';
-import { LoginRequest } from '@/services/auth';
+import { LoginRequest } from '@/schemas/auth';
 
 export default function AuthPage() {
   const [formData, setFormData] = useState<LoginRequest>({
@@ -103,7 +103,7 @@ export default function AuthPage() {
         <Button
           text={loginMutation.isPending ? '로그인 중...' : '로그인'}
           onClick={() => {}}
-          className="w-full bg-blue-700 text-white disabled:bg-gray-400"
+          className="w-full bg-blue-700 py-3.5 text-white disabled:bg-gray-400"
           type="submit"
           disabled={loginMutation.isPending}
         />

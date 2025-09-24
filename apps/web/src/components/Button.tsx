@@ -21,7 +21,7 @@ export function Button({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={clsx('rounded-lg py-3.5', className)}
+      className={clsx(className, 'rounded-lg')}
       type={type}
     >
       {text}
