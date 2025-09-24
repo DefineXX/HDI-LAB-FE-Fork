@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -6,6 +6,17 @@ const nextConfig: NextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  transpilePackages: ['@hdi/ui', '@hdi/fonts'],
+  async redirects() {
+    return [
+      // Auth redirect to root
+      {
+        source: '/',
+        destination: '/auth',
+        permanent: false,
+      },
+    ];
   },
 };
 

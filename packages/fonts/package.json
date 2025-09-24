@@ -1,0 +1,9 @@
+{
+  "name": "@hdi/fonts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HDI LAB font files package",
+  "files": [
+    "pretendard"
+  ]
+}

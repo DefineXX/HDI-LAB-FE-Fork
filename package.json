@@ -1,20 +1,38 @@
 {
   "name": "with-tailwind",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:docs": "turbo run dev --filter=docs",
+    "dev:admin": "turbo run dev --filter=admin",
+    "dev:web:full": "concurrently \"pnpm --filter @hdi/ui run dev\" \"turbo run dev --filter=web\"",
+    "dev:docs:full": "concurrently \"pnpm --filter @hdi/ui run dev\" \"turbo run dev --filter=docs\"",
+    "dev:admin:full": "concurrently \"pnpm --filter @hdi/ui run dev\" \"turbo run dev --filter=admin\"",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "prepare": "husky && pnpm sync:fonts",
+    "sync:fonts": "pnpm -w dlx shx mkdir -p apps/web/src/app/fonts apps/docs/app/fonts apps/admin/src/app/fonts && pnpm -w dlx shx cp -f packages/fonts/pretendard/PretendardVariable.ttf apps/web/src/app/fonts/PretendardVariable.ttf && pnpm -w dlx shx cp -f packages/fonts/pretendard/PretendardVariable.ttf apps/docs/app/fonts/PretendardVariable.ttf && pnpm -w dlx shx cp -f packages/fonts/pretendard/PretendardVariable.ttf apps/admin/src/app/fonts/PretendardVariable.ttf",
+    "lint-staged": "lint-staged"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "concurrently": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.0",
     "prettier": "^3.6.0",
+    "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "shx": "^0.4.0",
     "turbo": "^2.5.6"
   },
-  "packageManager": "pnpm@8.15.6",
+  "packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a",
   "engines": {
-    "node": ">=18"
+    "node": ">=18",
+    "pnpm": ">=10"
   }
 }

@@ -1,0 +1,35 @@
+// 이미지 파일들에 대한 타입 정의
+declare module '*.png' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.jpg' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.jpeg' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.gif' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.svg' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.webp' {
+  const value: string;
+  export default value;
+}
+
+declare module '*.ico' {
+  const value: string;
+  export default value;
+}
