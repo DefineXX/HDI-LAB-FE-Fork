@@ -1,42 +1,23 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
 
 import { HongikUnivLogo } from '@hdi/ui';
 import Link from 'next/link';
 
 import { Button } from '@/components/Button';
 import { useLogout } from '@/hooks/useLogout';
-import { User } from '@/schemas/auth';
-import { getUserFromCookie, isAuthenticated } from '@/utils/cookies';
+import { useMe } from '@/hooks/useMe';
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
   const logoutMutation = useLogout();
 
-  useEffect(() => {
-    const checkAuthStatus = () => {
-      const authenticated = isAuthenticated();
-      const userData = getUserFromCookie();
-      setIsLoggedIn(authenticated);
-      setUser(userData);
-    };
+  // 로그아웃 중일 때는 useMe 훅 비활성화하여 불필요한 API 호출 방지
+  const { data: meData, isLoading, error } = useMe(!logoutMutation.isPending);
 
-    checkAuthStatus();
-
-    // 쿠키 변경 감지를 위한 이벤트 리스너
-    const handleStorageChange = () => {
-      checkAuthStatus();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+  // React Query 캐시에서 사용자 정보 가져오기 (클라이언트 쿠키 의존성 제거)
+  const isLoggedIn = !isLoading && !error && !!meData?.data;
+  const user = meData?.data || null;
 
   const handleLogout = () => {
     logoutMutation.mutate();

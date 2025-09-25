@@ -4,7 +4,18 @@ export const setCookie = (name: string, value: string, days: number = 7) => {
   const expires = new Date();
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
 
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;secure;samesite=strict`;
+  // HTTPS 환경에서만 secure 플래그 적용 (localhost에서는 제외)
+  const isSecure =
+    typeof window !== 'undefined' && window.location.protocol === 'https:';
+  const secureFlag = isSecure ? 'secure;' : '';
+
+  // 개발 환경에서는 SameSite를 lax로 설정하여 크로스 사이트 요청 허용
+  const sameSite =
+    typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? 'lax'
+      : 'strict';
+
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;${secureFlag}samesite=${sameSite}`;
 };
 
 export const getCookie = (name: string): string | null => {

@@ -1,16 +1,19 @@
 import { z } from 'zod';
 
+// 사용자 역할 스키마
+export const UserRoleSchema = z.enum(['USER', 'ADMIN']);
+
 // 사용자 정보 스키마
 export const UserSchema = z.object({
   id: z.number(),
-  email: z.string().email(),
+  email: z.email(),
   name: z.string(),
-  role: z.string(),
+  role: UserRoleSchema,
 });
 
 // 로그인 요청 스키마
 export const LoginRequestSchema = z.object({
-  email: z.string().email('올바른 이메일 형식을 입력해주세요.'),
+  email: z.email('올바른 이메일 형식을 입력해주세요.'),
   password: z.string().min(1, '비밀번호를 입력해주세요.'),
 });
 
@@ -27,8 +30,17 @@ export const LogoutResponseSchema = z.object({
   message: z.string(),
 });
 
+// 내 정보 조회 응답 스키마
+export const MeResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: UserSchema,
+});
+
 // 타입 추출
+export type UserRole = z.infer<typeof UserRoleSchema>;
 export type User = z.infer<typeof UserSchema>;
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 export type LogoutResponse = z.infer<typeof LogoutResponseSchema>;
+export type MeResponse = z.infer<typeof MeResponseSchema>;

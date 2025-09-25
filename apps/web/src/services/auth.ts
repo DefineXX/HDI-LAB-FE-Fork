@@ -6,6 +6,8 @@ import {
   LoginResponseSchema,
   LogoutResponse,
   LogoutResponseSchema,
+  MeResponse,
+  MeResponseSchema,
 } from '@/schemas/auth';
 
 export const login = async (
@@ -28,4 +30,11 @@ export const logout = async (): Promise<LogoutResponse> => {
 
   // 응답 데이터 검증
   return LogoutResponseSchema.parse(response.data);
+};
+
+export const getMe = async (): Promise<MeResponse> => {
+  const response = await apiClient.get('/auth/me');
+
+  // 응답 데이터 검증
+  return MeResponseSchema.parse(response.data);
 };
