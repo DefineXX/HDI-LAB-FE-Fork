@@ -3,9 +3,15 @@ import { UserType } from '@/schemas/auth';
 import {
   ProductSurveyDetailResponseSchema,
   SurveyProductApiResponseSchema,
+  SurveyResponseRequestSchema,
   type ProductSurveyDetailResponse,
   type SurveyProductApiResponse,
+  type SurveyResponseRequest,
 } from '@/schemas/survey';
+import {
+  WeightedScoreRequestArraySchema,
+  type WeightedScoreRequestArray,
+} from '@/schemas/weight-evaluation';
 
 export const surveyService = {
   /**
@@ -69,5 +75,54 @@ export const surveyService = {
       );
       throw error;
     }
+  },
+
+  /**
+   * 설문 응답 저장 (정량 평가 또는 정성 평가)
+   */
+  async saveSurveyResponse({
+    productResponseId,
+    requestData,
+  }: {
+    productResponseId: number;
+    requestData: SurveyResponseRequest;
+  }): Promise<void> {
+    // 요청 데이터 검증
+    const validatedData = SurveyResponseRequestSchema.parse(requestData);
+
+    const response = await apiClient.post(
+      `/survey/product/${productResponseId}`,
+      validatedData
+    );
+
+    console.log('Survey Response Save:', {
+      productResponseId,
+      requestData: validatedData,
+      response: response.data,
+    });
+
+    return response.data;
+  },
+
+  /**
+   * 가중치 평가 점수 제출
+   */
+  async submitWeightedScores(
+    requestData: WeightedScoreRequestArray
+  ): Promise<void> {
+    // 요청 데이터 검증
+    const validatedData = WeightedScoreRequestArraySchema.parse(requestData);
+
+    const response = await apiClient.post(
+      '/survey/scores/weighted',
+      validatedData
+    );
+
+    console.log('Weighted Scores Submit:', {
+      requestData: validatedData,
+      response: response.data,
+    });
+
+    return response.data;
   },
 };

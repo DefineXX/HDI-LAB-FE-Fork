@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import ProductImage from '@/components/survey/ProductImage';
 import ProductInfo from '@/components/survey/ProductInfo';
@@ -9,7 +9,10 @@ import QualitativeEvaluation from '@/components/survey/QualitativeEvaluation';
 import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyNavigation from '@/components/survey/SurveyNavigation';
 import SurveyQuestion from '@/components/survey/SurveyQuestion';
-import { useProductSurveyDetail } from '@/hooks/useSurveyProducts';
+import {
+  useProductSurveyDetail,
+  useSaveSurveyResponse,
+} from '@/hooks/useSurveyProducts';
 import { UserType } from '@/schemas/auth';
 import { type ProductSurveyQuestion } from '@/schemas/survey';
 import { saveSurveyProgress } from '@/utils/survey';
@@ -33,6 +36,80 @@ export default function SurveyPage() {
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
+  const [savingQuestions, setSavingQuestions] = useState<Set<string>>(
+    new Set()
+  );
+  const [isSavingQualitative, setIsSavingQualitative] = useState(false);
+
+  // 서버에서 받아온 데이터를 클라이언트 상태에 반영
+  useEffect(() => {
+    if (detail?.productSurveyResponse?.surveyResponses) {
+      const serverAnswers: Record<string, number> = {};
+
+      detail.productSurveyResponse.surveyResponses.forEach((question) => {
+        // response 값이 0이면 선택되지 않은 상태, 1~5면 해당 값이 선택된 상태
+        if (question.response > 0) {
+          serverAnswers[String(question.index)] = question.response;
+        }
+      });
+
+      setAnswers(serverAnswers);
+    }
+
+    // 정성평가 응답도 서버 데이터에서 초기화
+    if (detail?.productSurveyResponse?.textSurveyResponse?.response) {
+      setQualitativeAnswer(
+        detail.productSurveyResponse.textSurveyResponse.response
+      );
+    }
+  }, [detail]);
+
+  // 설문 응답 저장 mutation
+  const saveSurveyResponseMutation = useSaveSurveyResponse();
+
+  // 정량평가 저장 핸들러
+  const handleQuantitativeSave = async (questionId: string, value: number) => {
+    setSavingQuestions((prev) => new Set(prev).add(questionId));
+
+    try {
+      await saveSurveyResponseMutation.mutateAsync({
+        productResponseId: Number(surveyId),
+        requestData: {
+          index: Number(questionId),
+          response: value,
+          textResponse: null,
+        },
+      });
+    } catch (error) {
+      console.error('정량평가 저장 실패:', error);
+    } finally {
+      setSavingQuestions((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(questionId);
+        return newSet;
+      });
+    }
+  };
+
+  // 정성평가 저장 핸들러
+  const handleQualitativeSave = async (textResponse: string) => {
+    setIsSavingQualitative(true);
+
+    try {
+      await saveSurveyResponseMutation.mutateAsync({
+        productResponseId: Number(surveyId),
+        requestData: {
+          index: null,
+          response: null,
+          textResponse,
+        },
+      });
+    } catch (error) {
+      console.error('정성평가 저장 실패:', error);
+    } finally {
+      setIsSavingQualitative(false);
+    }
+  };
 
   // 실제 데이터 로딩 상태 처리
   if (isLoading) {
@@ -88,6 +165,22 @@ export default function SurveyPage() {
       ...prev,
       [questionId]: value,
     }));
+
+    // 로컬 스토리지에도 저장 (백업용)
+    saveSurveyProgress(surveyId, {
+      questionsAnswered: { ...answers, [questionId]: value },
+      qualitativeAnswer,
+    });
+  };
+
+  const handleQualitativeChange = (value: string) => {
+    setQualitativeAnswer(value);
+
+    // 로컬 스토리지에도 저장 (백업용)
+    saveSurveyProgress(surveyId, {
+      questionsAnswered: answers,
+      qualitativeAnswer: value,
+    });
   };
 
   const handleSave = () => {
@@ -119,9 +212,15 @@ export default function SurveyPage() {
 
   const isAllAnswered = questions.every((q) => {
     const key = String(q.index);
-    return answers[key] !== undefined;
+    // 서버 데이터의 response가 있거나 클라이언트 상태에 답변이 있으면 완료된 것으로 간주
+    return q.response > 0 || answers[key] !== undefined;
   });
-  const isQualitativeValid = qualitativeAnswer.length >= 300;
+
+  // 정성평가 유효성 검사 - 서버 데이터나 클라이언트 상태 모두 고려
+  const currentQualitativeValue =
+    detail?.productSurveyResponse?.textSurveyResponse?.response ||
+    qualitativeAnswer;
+  const isQualitativeValid = currentQualitativeValue.length >= 300;
 
   return (
     <div className="mx-auto h-full px-8 py-6">
@@ -172,25 +271,34 @@ export default function SurveyPage() {
             <div className="space-y-8">
               {questions.map((question) => {
                 const qId = String(question.index);
-                const qText = String(
-                  question.survey ?? question.response ?? `문항 ${qId}`
-                );
+                const qText = String(question.survey ?? `문항 ${qId}`);
+                // 서버에서 받아온 response 값이 있으면 사용, 없으면 클라이언트 상태 사용
+                const currentValue =
+                  question.response > 0 ? question.response : answers[qId];
+
                 return (
                   <SurveyQuestion
                     key={qId}
                     questionId={qId}
                     questionNumber={qId}
                     question={qText}
-                    value={answers[qId]}
+                    value={currentValue}
                     onChange={(value) => handleAnswerChange(qId, value)}
+                    onSave={handleQuantitativeSave}
+                    isSaving={savingQuestions.has(qId)}
                   />
                 );
               })}
 
               {/* 정성평가 섹션 */}
               <QualitativeEvaluation
-                value={qualitativeAnswer}
-                onChange={setQualitativeAnswer}
+                value={
+                  detail?.productSurveyResponse?.textSurveyResponse?.response ||
+                  qualitativeAnswer
+                }
+                onChange={handleQualitativeChange}
+                onSave={handleQualitativeSave}
+                isSaving={isSavingQualitative}
               />
             </div>
           </div>

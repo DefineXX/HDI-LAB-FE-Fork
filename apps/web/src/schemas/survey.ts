@@ -134,3 +134,16 @@ export type BrandSurveyQuestion = z.infer<typeof BrandSurveyQuestionSchema>;
 export type BrandTextSurveyResponse = z.infer<
   typeof BrandTextSurveyResponseSchema
 >;
+
+// ========================
+// 설문 응답 저장 요청 스키마
+// ========================
+
+// 설문 응답 저장 요청 DTO (정량 평가, 정성 평가 응답 제출)
+export const SurveyResponseRequestSchema = z.object({
+  index: z.int32().nullable(),
+  response: z.int32().nullable(),
+  textResponse: z.string().nullable(),
+});
+
+export type SurveyResponseRequest = z.infer<typeof SurveyResponseRequestSchema>;
