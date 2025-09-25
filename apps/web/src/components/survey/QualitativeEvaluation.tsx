@@ -22,7 +22,7 @@ export default function QualitativeEvaluation({
   const [characterCount, setCharacterCount] = useState(value.length);
   const [isFocused, setIsFocused] = useState(false);
   const [hasUserInput, setHasUserInput] = useState(false);
-  const minCharacters = 300;
+  const minCharacters = 200;
   const maxCharacters = 500;
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastInputTimeRef = useRef<number>(0);

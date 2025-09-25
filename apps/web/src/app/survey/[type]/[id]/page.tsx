@@ -183,18 +183,6 @@ export default function SurveyPage() {
     });
   };
 
-  const handleSave = () => {
-    console.log('임시저장:', { answers, qualitativeAnswer });
-
-    // 설문 진행 상태 저장
-    if (surveyId) {
-      saveSurveyProgress(surveyId, {
-        questionsAnswered: answers,
-        qualitativeAnswer,
-      });
-    }
-  };
-
   const handleComplete = () => {
     console.log('설문 문항 평가완료:', { answers, qualitativeAnswer });
 
@@ -205,8 +193,9 @@ export default function SurveyPage() {
         qualitativeAnswer,
       });
 
-      // 가중치 평가 페이지로 이동
-      router.push(`/weight-evaluation`);
+      // 가중치 평가 페이지로 이동 (type에 따라 동적 라우팅)
+      const evaluationType = type === 'brand' ? 'logo' : 'product';
+      router.push(`/weight-evaluation/${evaluationType}`);
     }
   };
 
@@ -220,7 +209,7 @@ export default function SurveyPage() {
   const currentQualitativeValue =
     detail?.productSurveyResponse?.textSurveyResponse?.response ||
     qualitativeAnswer;
-  const isQualitativeValid = currentQualitativeValue.length >= 300;
+  const isQualitativeValid = currentQualitativeValue.length >= 200;
 
   return (
     <div className="mx-auto h-full px-8 py-6">
@@ -306,7 +295,6 @@ export default function SurveyPage() {
           {/* 하단 고정 버튼 영역 */}
           <div className="inset-shadow-sm flex-shrink-0 border-t border-gray-100 bg-gray-50/80 px-6 py-4">
             <SurveyNavigation
-              onSave={handleSave}
               onComplete={handleComplete}
               canComplete={isAllAnswered && isQualitativeValid}
             />

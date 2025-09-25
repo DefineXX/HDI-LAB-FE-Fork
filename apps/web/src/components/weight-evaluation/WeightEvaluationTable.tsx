@@ -18,7 +18,7 @@ export default function WeightEvaluationTable({
 }: WeightEvaluationTableProps) {
   const calculateTotal = (category: WeightEvaluationCategory): number => {
     return Object.values(category.weights).reduce(
-      (sum, weight) => sum + weight,
+      (sum: number, weight: number) => sum + weight,
       0
     );
   };
