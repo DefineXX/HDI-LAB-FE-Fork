@@ -5,24 +5,56 @@ import { Button } from '@/components/Button';
 import { useMe } from '@/hooks/useMe';
 import { useSurveyProducts } from '@/hooks/useSurveyProducts';
 import { SurveyProduct } from '@/schemas/survey';
+import { useState } from 'react';
 
 export default function InboxPage() {
   const { data: userInfo, isLoading: isMeLoading, error: meError } = useMe();
-  const { userType, surveyDone } = userInfo?.data || {};
+  const { userType } = userInfo?.data || {};
   const { data, isLoading, error } = useSurveyProducts({
     type: userType,
   });
 
+  // 전체 설문 제출 상태 관리
+  const [isAllSurveysSubmitted, setIsAllSurveysSubmitted] = useState(false);
+
   // surveyDone 타입 가드 및 boolean 변환 - undefined/null 안전 처리
-  const isSurveyCompleted = (() => {
-    if (surveyDone === null || surveyDone === undefined) return false;
-    return surveyDone === true;
+  // TODO: 추후 백엔드 API와 연동 시 사용 예정
+  // const isSurveyCompleted = (() => {
+  //   if (surveyDone === null || surveyDone === undefined) return false;
+  //   return surveyDone === true;
+  // })();
+
+  // 모든 설문이 완료 상태인지 확인하는 로직
+  const areAllSurveysCompleted = (() => {
+    if (!data?.data || !Array.isArray(data.data)) return false;
+    const surveys = data.data as SurveyProduct[];
+    return (
+      surveys.length > 0 &&
+      surveys.every((survey) => survey.responseStatus === 'DONE')
+    );
   })();
+
+  // 전체 설문 제출 버튼 활성화 조건
+  const isSubmitAllButtonEnabled =
+    areAllSurveysCompleted && !isAllSurveysSubmitted;
 
   // 전체 설문 제출 핸들러
   const handleSubmitAllSurveys = () => {
-    // TODO: 전체 설문 제출 로직 구현
-    console.log('전체 설문 제출');
+    if (isSubmitAllButtonEnabled) {
+      // TODO: API 호출로 전체 설문 제출 및 surveyDone 상태 업데이트
+      // await submitAllSurveysAPI();
+      // 백엔드에서 surveyDone을 true로 변경하고 프론트엔드 상태 동기화
+      console.log('전체 설문 제출');
+      setIsAllSurveysSubmitted(true);
+    }
+  };
+
+  // 전체 설문 제출 상태 토글 핸들러
+  const handleToggleSubmitStatus = () => {
+    // TODO: API 호출로 surveyDone 상태 토글
+    // await toggleSurveyDoneAPI(!isAllSurveysSubmitted);
+    // 백엔드에서 surveyDone을 토글하고 프론트엔드 상태 동기화
+    setIsAllSurveysSubmitted((prev) => !prev);
   };
 
   // 사용자 정보 로딩 중
@@ -125,14 +157,21 @@ export default function InboxPage() {
       {/* 전체 설문 제출 버튼 - 데이터가 정상적으로 로드된 경우에만 표시 */}
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold text-gray-900">설문함</h1>
+        {/* 전체 설문 제출 버튼 */}
         <Button
-          text="전체 설문 제출"
-          onClick={handleSubmitAllSurveys}
-          disabled={!isSurveyCompleted}
+          text={isAllSurveysSubmitted ? '제출 완료' : '전체 설문 제출'}
+          onClick={
+            isAllSurveysSubmitted
+              ? handleToggleSubmitStatus
+              : handleSubmitAllSurveys
+          }
+          disabled={!isSubmitAllButtonEnabled && !isAllSurveysSubmitted}
           className={
-            isSurveyCompleted
-              ? 'bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800'
-              : 'pointer-events-none bg-gray-200 px-6 py-3 text-sm font-medium text-gray-400'
+            isAllSurveysSubmitted
+              ? 'bg-gray-200 px-6 py-3 text-sm font-medium text-gray-400 shadow-inner transition-colors'
+              : isSubmitAllButtonEnabled
+                ? 'bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800'
+                : 'pointer-events-none bg-gray-200 px-6 py-3 text-sm font-medium text-gray-400'
           }
           type="button"
         />
