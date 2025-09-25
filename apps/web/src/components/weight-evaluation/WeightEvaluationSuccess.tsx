@@ -8,10 +8,12 @@ import { ThumbUp } from '@hdi/ui';
 
 interface WeightEvaluationSuccessProps {
   onRedirect?: () => void;
+  type: 'brand' | 'product';
 }
 
 export default function WeightEvaluationSuccess({
   onRedirect,
+  type,
 }: WeightEvaluationSuccessProps) {
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
@@ -22,7 +24,10 @@ export default function WeightEvaluationSuccess({
         if (prev <= 1) {
           clearInterval(timer);
           onRedirect?.();
-          router.push('/inbox');
+          // 다음 이벤트 루프 틱으로 지연시켜서 React 렌더링 사이클과 충돌 방지
+          setTimeout(() => {
+            router.push(`/inbox/${type}`);
+          }, 0);
           return 0;
         }
         return prev - 1;
@@ -30,7 +35,7 @@ export default function WeightEvaluationSuccess({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [router, onRedirect]);
+  }, [router, onRedirect, type]);
 
   return (
     <div className="flex h-full flex-col items-center justify-center space-y-8 px-4 py-8">
@@ -78,7 +83,10 @@ export default function WeightEvaluationSuccess({
       <button
         onClick={() => {
           onRedirect?.();
-          router.push('/inbox');
+          // 다음 이벤트 루프 틱으로 지연시켜서 React 렌더링 사이클과 충돌 방지
+          setTimeout(() => {
+            router.push(`/inbox/${type}`);
+          }, 0);
         }}
         className="rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
       >

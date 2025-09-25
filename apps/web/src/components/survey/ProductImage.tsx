@@ -1,21 +1,17 @@
 import { clsx } from 'clsx';
-// import Image from 'next/image';
+import Image from 'next/image';
 
 interface ProductImageProps {
-  logoText: string;
+  imagePath: string;
   label?: string;
-  backgroundColor?: string;
-  textColor?: string;
   className?: string;
   imageClassName?: string;
   labelClassName?: string;
 }
 
 export default function ProductImage({
-  logoText,
+  imagePath,
   label,
-  backgroundColor = 'bg-black',
-  textColor = 'text-white',
   className,
   imageClassName,
   labelClassName,
@@ -27,22 +23,18 @@ export default function ProductImage({
 
       {/* Image Content */}
       <div className="flex-1 space-y-3">
-        {/* Product Image - 임시 텍스트로 표시 */}
+        {/* Product Image */}
         <div
-          className={clsx(
-            'flex aspect-square w-full items-center justify-center',
-            backgroundColor,
-            imageClassName
-          )}
+          className={clsx('w-full overflow-hidden rounded-lg', imageClassName)}
         >
-          <span
-            className={clsx(
-              'text-6xl font-bold uppercase tracking-wider',
-              textColor
-            )}
-          >
-            {logoText}
-          </span>
+          <Image
+            src={imagePath}
+            alt={label || '제품 이미지'}
+            width={0}
+            height={0}
+            sizes="100vw"
+            className="h-auto w-full object-contain"
+          />
         </div>
 
         {/* Label */}

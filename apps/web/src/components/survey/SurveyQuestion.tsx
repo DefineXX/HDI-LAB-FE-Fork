@@ -1,12 +1,16 @@
 import { clsx } from 'clsx';
 import { useEffect, useMemo, useRef } from 'react';
 
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+
 interface SurveyQuestionProps {
   questionId: string;
   question: string;
   questionNumber?: string;
   value?: number;
   onChange: (value: number) => void;
+  onSave?: (questionId: string, value: number) => void;
+  isSaving?: boolean;
   className?: string;
 }
 
@@ -16,6 +20,8 @@ export default function SurveyQuestion({
   questionNumber,
   value,
   onChange,
+  onSave,
+  isSaving = false,
   className,
 }: SurveyQuestionProps) {
   const radioRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -43,6 +49,15 @@ export default function SurveyQuestion({
     }
   }, [value, options]);
 
+  // 값 변경 핸들러
+  const handleValueChange = (newValue: number) => {
+    onChange(newValue);
+    // 저장 함수가 있으면 호출
+    if (onSave) {
+      onSave(questionId, newValue);
+    }
+  };
+
   // 탭으로 포커스가 들어올 때 선택된 항목으로 포커스 이동
   const handleFocus = (event: React.FocusEvent) => {
     if (value !== undefined) {
@@ -67,7 +82,7 @@ export default function SurveyQuestion({
         const prevIndex =
           currentIndex > 0 ? currentIndex - 1 : options.length - 1;
         radioRefs.current[prevIndex]?.focus();
-        onChange(options[prevIndex]?.value || 1);
+        handleValueChange(options[prevIndex]?.value || 1);
         break;
       }
       case 'ArrowRight':
@@ -76,12 +91,12 @@ export default function SurveyQuestion({
         const nextIndex =
           currentIndex < options.length - 1 ? currentIndex + 1 : 0;
         radioRefs.current[nextIndex]?.focus();
-        onChange(options[nextIndex]?.value || 1);
+        handleValueChange(options[nextIndex]?.value || 1);
         break;
       }
       case ' ': {
         event.preventDefault();
-        onChange(options[currentIndex]?.value || 1);
+        handleValueChange(options[currentIndex]?.value || 1);
         break;
       }
     }
@@ -107,6 +122,13 @@ export default function SurveyQuestion({
           >
             {question}
           </p>
+          {/* 저장 상태 표시 */}
+          {isSaving && (
+            <div className="flex items-center gap-1 text-xs text-blue-600">
+              <LoadingSpinner size="sm" />
+              <span>저장 중...</span>
+            </div>
+          )}
         </div>
 
         {/* Rating Scale */}
@@ -130,7 +152,7 @@ export default function SurveyQuestion({
                   name={questionId}
                   value={option.value}
                   checked={value === option.value}
-                  onChange={() => onChange(option.value)}
+                  onChange={() => handleValueChange(option.value)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
                   onFocus={handleFocus}
                   tabIndex={0}

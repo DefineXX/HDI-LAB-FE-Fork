@@ -8,7 +8,7 @@ export const isSurveyQuestionsCompleted = (
   questionsAnswered: Record<string, number>,
   requiredQuestions: string[],
   qualitativeAnswer: string,
-  minQualitativeLength: number = 300
+  minQualitativeLength: number = 200
 ): boolean => {
   const allQuestionsAnswered = requiredQuestions.every(
     (questionId) => questionsAnswered[questionId] !== undefined

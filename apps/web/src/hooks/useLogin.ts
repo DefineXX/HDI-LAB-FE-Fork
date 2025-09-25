@@ -31,7 +31,7 @@ export const useLogin = () => {
       console.log('✅ 사용자 정보 캐시에 직접 설정 완료');
 
       // 성공 후 inbox로 리다이렉트
-      router.push('/inbox');
+      router.push(`/inbox/${data.data.userType.toLowerCase()}`);
     },
     onError: (error) => {
       console.error('로그인 실패:', error);

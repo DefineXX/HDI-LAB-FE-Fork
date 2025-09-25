@@ -1,12 +1,32 @@
-export default function WeightEvaluationHeader() {
+interface WeightEvaluationHeaderProps {
+  type?: 'brand' | 'product';
+}
+
+export default function WeightEvaluationHeader({
+  type = 'brand',
+}: WeightEvaluationHeaderProps) {
+  const getHeaderContent = () => {
+    if (type === 'brand') {
+      return {
+        title: '부문별 평가요인 가중치',
+        description:
+          '각 카테고리 별 로고 디자인 평가 항목의 중요도에 대해 평가부탁드립니다.',
+      };
+    } else {
+      return {
+        title: '부문별 평가요인 가중치',
+        description:
+          '각 카테고리 별 제품 디자인 평가 항목의 중요도에 대해 평가부탁드립니다.',
+      };
+    }
+  };
+
+  const { title, description } = getHeaderContent();
+
   return (
     <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
-      <h1 className="text-xl font-semibold text-gray-800">
-        부문별 평가요인 가중치
-      </h1>
-      <p className="mt-1 text-sm text-gray-600">
-        각 카테고리 별 디자인 평가 항목의 중요도에 대해 평가부탁드립니다.
-      </p>
+      <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
+      <p className="mt-1 text-sm text-gray-600">{description}</p>
 
       {/* 상태 색상 가이드 */}
       <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3">

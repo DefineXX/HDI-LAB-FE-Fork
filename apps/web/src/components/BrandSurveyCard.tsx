@@ -1,5 +1,8 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import {
   SURVEY_STATUS_BUTTON_STYLES,
@@ -9,6 +12,7 @@ import type { SurveyProduct } from '@/schemas/survey';
 
 export default function BrandSurveyCard({ item }: { item: SurveyProduct }) {
   const { name, image, responseId, responseStatus } = item;
+  const { type } = useParams();
 
   const numberLabel = responseId.toString().padStart(2, '0');
   const status = responseStatus;
@@ -21,7 +25,7 @@ export default function BrandSurveyCard({ item }: { item: SurveyProduct }) {
       </span>
 
       {/* 이미지 영역 */}
-      <div className="relative mb-3 h-20 w-full overflow-hidden rounded bg-gray-100">
+      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded bg-gray-100">
         <Image
           src={image}
           alt={name}
@@ -47,7 +51,7 @@ export default function BrandSurveyCard({ item }: { item: SurveyProduct }) {
 
       {/* 버튼 */}
       <Link
-        href={`/survey/${responseId}`}
+        href={`/survey/${type}/${responseId}`}
         className={`block w-full rounded px-3 py-2 text-center text-xs transition-colors ${SURVEY_STATUS_BUTTON_STYLES[status]}`}
       >
         {SURVEY_STATUS_LABELS[status]}
