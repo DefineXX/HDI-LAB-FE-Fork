@@ -104,7 +104,7 @@ export default function InboxPage() {
   }
 
   // 설문 데이터가 없는 경우
-  if (!data?.data || data.data.length === 0) {
+  if (!data?.data || (data.data as SurveyProduct[]).length === 0) {
     return (
       <div className="space-y-6 px-8 py-12">
         <h1 className="text-2xl font-bold text-gray-900">설문함</h1>
@@ -140,7 +140,7 @@ export default function InboxPage() {
 
       {/* 그리드 뷰 */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-        {data.data.map((item: SurveyProduct) => (
+        {(data.data as SurveyProduct[]).map((item: SurveyProduct) => (
           <BrandSurveyCard key={item.responseId} item={item} />
         ))}
       </div>

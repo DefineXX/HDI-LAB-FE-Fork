@@ -11,3 +11,23 @@ export const useSurveyProducts = ({ type }: { type: UserType | undefined }) => {
     gcTime: 10 * 60 * 1000, // 10분간 캐시 유지
   });
 };
+
+export const useProductSurveyDetail = ({
+  type,
+  productResponseId,
+}: {
+  type: UserType;
+  productResponseId: number | undefined;
+}) => {
+  return useQuery({
+    queryKey: ['productSurveyDetail', productResponseId],
+    queryFn: () =>
+      surveyService.getProductSurveyDetail({
+        type,
+        productResponseId: productResponseId!,
+      }),
+    enabled: typeof productResponseId === 'number' && !!type,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};

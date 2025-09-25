@@ -1,7 +1,9 @@
 import { apiClient } from '@/lib/axios';
 import { UserType } from '@/schemas/auth';
 import {
+  ProductSurveyDetailResponseSchema,
   SurveyProductApiResponseSchema,
+  type ProductSurveyDetailResponse,
   type SurveyProductApiResponse,
 } from '@/schemas/survey';
 
@@ -25,6 +27,33 @@ export const surveyService = {
       return validatedData;
     } catch (error) {
       console.error('Schema validation failed:', error);
+      console.error(
+        'Raw response data:',
+        JSON.stringify(response.data, null, 2)
+      );
+      throw error;
+    }
+  },
+  /**
+   * 제품 설문 상세 조회
+   */
+  async getProductSurveyDetail({
+    type,
+    productResponseId,
+  }: {
+    type: UserType;
+    productResponseId: number;
+  }): Promise<ProductSurveyDetailResponse> {
+    const response = await apiClient.get(
+      `/survey/${type.toLowerCase()}/${productResponseId}`
+    );
+
+    console.log(`${type} SurveyDetail Response:`, response.data);
+
+    try {
+      return ProductSurveyDetailResponseSchema.parse(response.data);
+    } catch (error) {
+      console.error('ProductSurveyDetail schema validation failed:', error);
       console.error(
         'Raw response data:',
         JSON.stringify(response.data, null, 2)

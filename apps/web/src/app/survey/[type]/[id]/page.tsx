@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import ProductImage from '@/components/survey/ProductImage';
 import ProductInfo from '@/components/survey/ProductInfo';
@@ -9,43 +9,30 @@ import QualitativeEvaluation from '@/components/survey/QualitativeEvaluation';
 import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyNavigation from '@/components/survey/SurveyNavigation';
 import SurveyQuestion from '@/components/survey/SurveyQuestion';
+import { useProductSurveyDetail } from '@/hooks/useSurveyProducts';
+import { UserType } from '@/schemas/auth';
+import { type ProductSurveyQuestion } from '@/schemas/survey';
 import { loadSurveyProgress, saveSurveyProgress } from '@/utils/survey';
 
-// 임시 데이터 - 실제로는 API에서 가져올 데이터
-const mockSurveyData = {
-  id: '0001',
-  brandName: '디올',
-  division: 'bplo',
-  category: '화장품/미용>향수>여성향수',
-  representativeProduct: '디올뷰티 어딕트 립 글로우',
-  target: '여성/20-30대',
-  homepage: 'https://www.dior.com/ko_kr',
-  logoText: 'DIOR',
-};
-
-const surveyQuestions = [
-  {
-    id: '1-1',
-    question: '이 로고 디자인은 긍정적인 인상을 준다',
-  },
-  {
-    id: '1-2',
-    question: '이 로고 디자인은 감성적으로 끌린다',
-  },
-  {
-    id: '1-3',
-    question: '이 로고 디자인은 형태, 서체가 미적으로 우수하다',
-  },
-  {
-    id: '1-4',
-    question: '이 로고 디자인은 형태, 서체가 미적으로 우수하다',
-  },
-];
+// 설문 문항은 상세 응답의 surveyResponses에서 구성합니다
 
 export default function SurveyPage() {
   const router = useRouter();
-  const { id } = useParams();
+  const { id, type } = useParams();
   const surveyId = Array.isArray(id) ? id[0] : id || 'default';
+  const productResponseId = useMemo(() => {
+    const numeric = Number(surveyId);
+    return Number.isFinite(numeric) ? numeric : undefined;
+  }, [surveyId]);
+
+  const {
+    data: detail,
+    isLoading,
+    error,
+  } = useProductSurveyDetail({
+    type: type as UserType,
+    productResponseId,
+  });
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
@@ -61,8 +48,28 @@ export default function SurveyPage() {
     }
   }, [surveyId]);
 
-  // 실제로는 params.id를 사용해서 해당 설문 데이터를 가져와야 함
-  console.log('Survey ID:', id);
+  // 실제 데이터 로딩 상태 처리
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-sm text-gray-600">설문 데이터를 불러오는 중...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-sm text-red-500">
+          설문 데이터를 불러오지 못했습니다.
+        </p>
+      </div>
+    );
+  }
+
+  const product = detail?.productDataSetResponse;
+  const questions: ProductSurveyQuestion[] =
+    detail?.productSurveyResponse.surveyResponses ?? [];
 
   const handleAnswerChange = (questionId: string, value: number) => {
     setAnswers((prev) => ({
@@ -98,9 +105,10 @@ export default function SurveyPage() {
     }
   };
 
-  const isAllAnswered = surveyQuestions.every(
-    (q) => answers[q.id] !== undefined
-  );
+  const isAllAnswered = questions.every((q) => {
+    const key = String(q.index);
+    return answers[key] !== undefined;
+  });
   const isQualitativeValid = qualitativeAnswer.length >= 300;
 
   return (
@@ -115,21 +123,23 @@ export default function SurveyPage() {
             <p className="text-sm text-gray-600">브랜드 및 제품 상세 정보</p>
           </div>
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6">
-            <ProductInfo
-              id={mockSurveyData.id}
-              brandName={mockSurveyData.brandName}
-              division={mockSurveyData.division}
-              representativeCategory={mockSurveyData.category}
-              representativeProduct={mockSurveyData.representativeProduct}
-              target={mockSurveyData.target}
-              homepage={mockSurveyData.homepage}
-            />
+            {product && (
+              <ProductInfo
+                id={product.id}
+                brandName={product.productName || product.companyName || ''}
+                division={product.productTypeName || ''}
+                representativeCategory={product.modelName || ''}
+                representativeProduct={product.productName || ''}
+                target={product.size || ''}
+                homepage={product.referenceUrl || ''}
+              />
+            )}
 
             <ProductImage
-              logoText={mockSurveyData.logoText}
+              logoText={(product?.productName || 'PRODUCT').slice(0, 10)}
               backgroundColor="bg-black"
               textColor="text-white"
-              label="디올 뷰티 어딕트 립 글로우"
+              label={product?.modelName || ''}
             />
           </div>
         </div>
@@ -147,21 +157,29 @@ export default function SurveyPage() {
 
           {/* 스크롤 가능한 설문 내용 영역 */}
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6 pb-8">
-            <SurveyHeader
-              datasetId={`${mockSurveyData.id}_${mockSurveyData.division}`}
-            />
+            {product && (
+              <SurveyHeader
+                datasetId={`${product.id}_${product.productTypeName || ''}`}
+              />
+            )}
 
             <div className="space-y-8">
-              {surveyQuestions.map((question) => (
-                <SurveyQuestion
-                  key={question.id}
-                  questionId={question.id}
-                  questionNumber={question.id}
-                  question={question.question}
-                  value={answers[question.id]}
-                  onChange={(value) => handleAnswerChange(question.id, value)}
-                />
-              ))}
+              {questions.map((question) => {
+                const qId = String(question.index);
+                const qText = String(
+                  question.survey ?? question.response ?? `문항 ${qId}`
+                );
+                return (
+                  <SurveyQuestion
+                    key={qId}
+                    questionId={qId}
+                    questionNumber={qId}
+                    question={qText}
+                    value={answers[qId]}
+                    onChange={(value) => handleAnswerChange(qId, value)}
+                  />
+                );
+              })}
 
               {/* 정성평가 섹션 */}
               <QualitativeEvaluation
