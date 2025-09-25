@@ -1,14 +1,19 @@
 import axios from 'axios';
 
-import { deleteCookie } from '@/utils/cookies';
+import { clearAuthCookies } from '@/utils/cookies';
 
 // 프록시를 통한 안정적인 API 호출
 const getBaseURL = () => {
   if (typeof window !== 'undefined') {
     // 클라이언트 사이드에서는 프록시 사용 (같은 도메인으로 요청)
+    console.log('🌐 클라이언트 사이드 - 프록시 사용: /api');
+    console.log('🌐 현재 URL:', window.location.href);
+    console.log('🌐 프록시 대상: https://api.hdi.ai.kr');
     return '/api';
   }
   // 서버 사이드에서는 직접 API 호출
+  console.log('🌐 서버 사이드 - 직접 호출: https://api.hdi.ai.kr');
+  console.log('⚠️ 서버 사이드에서는 프록시를 사용할 수 없습니다!');
   return 'https://api.hdi.ai.kr';
 };
 
@@ -36,6 +41,12 @@ apiClient.interceptors.request.use(
       '🌐 프록시 사용:',
       config.baseURL === '/api' ? '✅ 클라이언트 프록시' : '🔗 서버 직접 호출'
     );
+
+    // 프록시 실패 감지
+    if (config.baseURL !== '/api' && typeof window !== 'undefined') {
+      console.error('❌ 프록시 실패! 클라이언트에서 직접 API 호출 중');
+      console.error('❌ 이는 CORS 문제를 일으킬 수 있습니다!');
+    }
     return config;
   },
   (error) => {
@@ -86,14 +97,13 @@ apiClient.interceptors.response.use(
       });
 
       if (!isLoginEndpoint) {
-        // 로그인 API, 사용자 정보 API, 설문 제품 API가 아닌 경우에만 쿠키 제거 및 리다이렉트
-        // 토큰은 서버에서 HttpOnly 쿠키로 관리되므로 클라이언트에서 직접 삭제할 수 없음
-        console.log('🔒 인증 실패 - 쿠키 삭제 및 리다이렉트');
-        deleteCookie('user'); // 사용자 정보 쿠키만 삭제
+        // 로그인 API가 아닌 경우에만 쿠키 제거 및 리다이렉트
+        console.log('🔒 인증 실패 - 모든 인증 쿠키 삭제 및 리다이렉트');
+        clearAuthCookies(); // 모든 인증 관련 쿠키 삭제 (JSESSIONID 포함)
         window.location.href = '/auth';
       } else {
         console.log(
-          '🔒 401 에러이지만 특정 엔드포인트이므로 리다이렉트하지 않음'
+          '🔒 401 에러이지만 로그인 엔드포인트이므로 리다이렉트하지 않음'
         );
       }
     }
