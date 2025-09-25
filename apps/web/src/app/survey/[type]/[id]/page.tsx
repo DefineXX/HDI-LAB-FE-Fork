@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import ProductImage from '@/components/survey/ProductImage';
 import ProductInfo from '@/components/survey/ProductInfo';
@@ -12,18 +12,15 @@ import SurveyQuestion from '@/components/survey/SurveyQuestion';
 import { useProductSurveyDetail } from '@/hooks/useSurveyProducts';
 import { UserType } from '@/schemas/auth';
 import { type ProductSurveyQuestion } from '@/schemas/survey';
-import { loadSurveyProgress, saveSurveyProgress } from '@/utils/survey';
+import { saveSurveyProgress } from '@/utils/survey';
 
 // 설문 문항은 상세 응답의 surveyResponses에서 구성합니다
 
 export default function SurveyPage() {
   const router = useRouter();
+
   const { id, type } = useParams();
-  const surveyId = Array.isArray(id) ? id[0] : id || 'default';
-  const productResponseId = useMemo(() => {
-    const numeric = Number(surveyId);
-    return Number.isFinite(numeric) ? numeric : undefined;
-  }, [surveyId]);
+  const surveyId = String(id);
 
   const {
     data: detail,
@@ -31,22 +28,11 @@ export default function SurveyPage() {
     error,
   } = useProductSurveyDetail({
     type: type as UserType,
-    productResponseId,
+    productResponseId: Number(surveyId),
   });
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
-
-  // 설문 진행 상태 불러오기
-  useEffect(() => {
-    if (surveyId) {
-      const progress = loadSurveyProgress(surveyId);
-      if (progress) {
-        setAnswers(progress.questionsAnswered);
-        setQualitativeAnswer(progress.qualitativeAnswer);
-      }
-    }
-  }, [surveyId]);
 
   // 실제 데이터 로딩 상태 처리
   if (isLoading) {
@@ -68,8 +54,34 @@ export default function SurveyPage() {
   }
 
   const product = detail?.productDataSetResponse;
+  // 이미지 링크들을 배열로 모음
+  const productImages = [
+    product?.detailImagePath,
+    product?.frontImagePath,
+    product?.sideImagePath,
+  ].filter(
+    (imagePath): imagePath is string =>
+      imagePath !== null && imagePath !== undefined
+  );
+
   const questions: ProductSurveyQuestion[] =
-    detail?.productSurveyResponse.surveyResponses ?? [];
+    detail?.productSurveyResponse?.surveyResponses ?? [];
+
+  // 데이터가 없을 때 처리
+  if (!detail || !product) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <p className="mb-2 text-sm text-gray-600">
+            설문 데이터를 찾을 수 없습니다.
+          </p>
+          <p className="text-xs text-gray-500">
+            관리자에게 문의하거나 다시 시도해주세요.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const handleAnswerChange = (questionId: string, value: number) => {
     setAnswers((prev) => ({
@@ -123,24 +135,28 @@ export default function SurveyPage() {
             <p className="text-sm text-gray-600">브랜드 및 제품 상세 정보</p>
           </div>
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6">
-            {product && (
-              <ProductInfo
-                id={product.id}
-                brandName={product.productName || product.companyName || ''}
-                division={product.productTypeName || ''}
-                representativeCategory={product.modelName || ''}
-                representativeProduct={product.productName || ''}
-                target={product.size || ''}
-                homepage={product.referenceUrl || ''}
-              />
-            )}
-
-            <ProductImage
-              logoText={(product?.productName || 'PRODUCT').slice(0, 10)}
-              backgroundColor="bg-black"
-              textColor="text-white"
-              label={product?.modelName || ''}
+            <ProductInfo
+              id={product.id || ''}
+              brandName={product.productName || product.companyName || ''}
+              division={product.productTypeName || ''}
+              representativeCategory={product.modelName || ''}
+              representativeProduct={product.productName || ''}
+              target={product.size || ''}
+              homepage={product.referenceUrl || ''}
             />
+
+            {/* 제품 이미지들 */}
+            {productImages.length > 0 && (
+              <div className="space-y-4">
+                {productImages.map((imagePath, index) => (
+                  <ProductImage
+                    key={`product-image-${index}`}
+                    imagePath={imagePath}
+                    label={`이미지 ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -157,11 +173,9 @@ export default function SurveyPage() {
 
           {/* 스크롤 가능한 설문 내용 영역 */}
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6 pb-8">
-            {product && (
-              <SurveyHeader
-                datasetId={`${product.id}_${product.productTypeName || ''}`}
-              />
-            )}
+            <SurveyHeader
+              datasetId={`${id}_${product.productTypeName || ''}`}
+            />
 
             <div className="space-y-8">
               {questions.map((question) => {

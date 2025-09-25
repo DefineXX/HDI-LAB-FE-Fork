@@ -42,6 +42,7 @@ export type SurveyProductApiResponse = z.infer<
 
 // 응답의 정확한 스펙이 확정되기 전이므로 필수 최소 필드만 엄격 검증하고 나머지는 관대하게(pass through) 처리합니다.
 export const ProductDataSetResponseSchema = z.object({
+  // 백엔드가 숫자 혹은 문자열을 반환할 수 있어 유연하게 수용 후 문자열로 정규화
   id: z.string(),
   productName: z.string(),
   companyName: z.string(),
@@ -52,7 +53,7 @@ export const ProductDataSetResponseSchema = z.object({
   weight: z.string(),
   referenceUrl: z.url().nullable(),
   registeredAt: z.string(),
-  productPath: z.url().nullable(),
+  productPath: z.string().nullable(),
   productTypeName: z.string().nullable(),
   detailImagePath: z.url().nullable(),
   frontImagePath: z.url().nullable(),
@@ -66,11 +67,12 @@ export const ProductSurveyQuestionSchema = z.object({
 });
 
 export const ProductTextSurveyResponseSchema = z.object({
-  survey: z.string(),
-  response: z.string(),
+  survey: z.string().nullable(),
+  response: z.string().nullable(),
 });
 
 export const ProductSurveyDetailResponseSchema = z.object({
+  // 일부 응답에서 null이 올 수 있어 nullable로 허용하되, 서비스 레이어에서 필수 보장 처리
   productDataSetResponse: ProductDataSetResponseSchema,
   productSurveyResponse: z.object({
     surveyResponses: z.array(ProductSurveyQuestionSchema),

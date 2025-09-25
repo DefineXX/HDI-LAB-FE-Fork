@@ -51,7 +51,16 @@ export const surveyService = {
     console.log(`${type} SurveyDetail Response:`, response.data);
 
     try {
-      return ProductSurveyDetailResponseSchema.parse(response.data);
+      const parsed = ProductSurveyDetailResponseSchema.parse(
+        response.data.data
+      );
+      // productDataSetResponse는 화면 렌더링의 핵심 데이터이므로 여기서 필수 보장
+      if (!parsed.productDataSetResponse) {
+        throw new Error(
+          'Missing productDataSetResponse in survey detail response'
+        );
+      }
+      return parsed;
     } catch (error) {
       console.error('ProductSurveyDetail schema validation failed:', error);
       console.error(
