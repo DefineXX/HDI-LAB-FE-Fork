@@ -12,14 +12,19 @@ export const SurveyProductSchema = z.object({
   name: z.string(),
   image: z.string(),
   responseStatus: SurveyProductResponseStatusSchema,
-  responseId: z.int64(),
+  responseId: z.number(), // z.int64()에서 z.number()로 변경
 });
 
-// 설문 제품 API 응답 스키마
-export const SurveyProductApiResponseSchema = z.object({
-  status: z.number(),
-  message: z.string(),
-  data: z.array(SurveyProductSchema),
+// 설문 제품 API 응답 스키마 (임시로 유연하게 처리)
+export const SurveyProductApiResponseSchema = z.any().transform((data) => {
+  // 실제 API 응답 구조에 맞게 변환
+  if (Array.isArray(data)) {
+    return { data };
+  }
+  if (data && data.data) {
+    return data;
+  }
+  return { data: [] };
 });
 
 // 타입 추출

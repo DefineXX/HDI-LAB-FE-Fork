@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // 사용자 역할 스키마
 export const UserRoleSchema = z.enum(['USER', 'ADMIN']);
+export const UserTypeSchema = z.enum(['PRODUCT', 'BRAND']);
 
 // 사용자 정보 스키마
 export const UserSchema = z.object({
@@ -9,6 +10,8 @@ export const UserSchema = z.object({
   email: z.email(),
   name: z.string(),
   role: UserRoleSchema,
+  userType: UserTypeSchema,
+  surveyDone: z.boolean().nullable(),
 });
 
 // 로그인 요청 스키마
@@ -40,6 +43,7 @@ export const MeResponseSchema = z.object({
 // 타입 추출
 export type UserRole = z.infer<typeof UserRoleSchema>;
 export type User = z.infer<typeof UserSchema>;
+export type UserType = z.infer<typeof UserTypeSchema>;
 export type LoginRequest = z.infer<typeof LoginRequestSchema>;
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
 export type LogoutResponse = z.infer<typeof LogoutResponseSchema>;

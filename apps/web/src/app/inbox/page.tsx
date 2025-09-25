@@ -3,10 +3,14 @@
 import BrandSurveyCard from '@/components/BrandSurveyCard';
 import { useMe } from '@/hooks/useMe';
 import { useSurveyProducts } from '@/hooks/useSurveyProducts';
+import { SurveyProduct } from '@/schemas/survey';
 
 export default function InboxPage() {
-  const { isLoading: isMeLoading, error: meError } = useMe();
-  const { data, isLoading, error } = useSurveyProducts();
+  const { data: userInfo, isLoading: isMeLoading, error: meError } = useMe();
+  const { userType } = userInfo?.data || {};
+  const { data, isLoading, error } = useSurveyProducts({
+    type: userType,
+  });
 
   // 사용자 정보 로딩 중
   if (isMeLoading) {
@@ -102,7 +106,7 @@ export default function InboxPage() {
 
       {/* 그리드 뷰 */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-        {data.data.map((item) => (
+        {data.data.map((item: SurveyProduct) => (
           <BrandSurveyCard key={item.responseId} item={item} />
         ))}
       </div>
