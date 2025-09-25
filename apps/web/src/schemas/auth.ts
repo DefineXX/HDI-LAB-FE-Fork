@@ -11,7 +11,7 @@ export const UserSchema = z.object({
   name: z.string(),
   role: UserRoleSchema,
   userType: UserTypeSchema,
-  surveyDone: z.boolean().nullable(),
+  surveyDone: z.boolean(),
 });
 
 // 로그인 요청 스키마

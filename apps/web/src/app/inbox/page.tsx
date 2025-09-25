@@ -1,16 +1,29 @@
 'use client';
 
 import BrandSurveyCard from '@/components/BrandSurveyCard';
+import { Button } from '@/components/Button';
 import { useMe } from '@/hooks/useMe';
 import { useSurveyProducts } from '@/hooks/useSurveyProducts';
 import { SurveyProduct } from '@/schemas/survey';
 
 export default function InboxPage() {
   const { data: userInfo, isLoading: isMeLoading, error: meError } = useMe();
-  const { userType } = userInfo?.data || {};
+  const { userType, surveyDone } = userInfo?.data || {};
   const { data, isLoading, error } = useSurveyProducts({
     type: userType,
   });
+
+  // surveyDone 타입 가드 및 boolean 변환 - undefined/null 안전 처리
+  const isSurveyCompleted = (() => {
+    if (surveyDone === null || surveyDone === undefined) return false;
+    return surveyDone === true;
+  })();
+
+  // 전체 설문 제출 핸들러
+  const handleSubmitAllSurveys = () => {
+    // TODO: 전체 설문 제출 로직 구현
+    console.log('전체 설문 제출');
+  };
 
   // 사용자 정보 로딩 중
   if (isMeLoading) {
@@ -48,7 +61,14 @@ export default function InboxPage() {
   if (isLoading) {
     return (
       <div className="space-y-6 px-8 py-12">
-        <h1 className="text-2xl font-bold text-gray-900">설문함</h1>
+        {/* 전체 설문 제출 버튼 스켈레톤 */}
+        <div className="flex justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">설문함</h1>
+          <div className="animate-pulse rounded-lg bg-gray-200 px-6 py-3">
+            <div className="h-4 w-24 rounded bg-gray-300"></div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {Array.from({ length: 10 }).map((_, index) => (
             <div
@@ -102,7 +122,21 @@ export default function InboxPage() {
 
   return (
     <div className="space-y-6 px-8 py-12">
-      <h1 className="text-2xl font-bold text-gray-900">설문함</h1>
+      {/* 전체 설문 제출 버튼 - 데이터가 정상적으로 로드된 경우에만 표시 */}
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">설문함</h1>
+        <Button
+          text="전체 설문 제출"
+          onClick={handleSubmitAllSurveys}
+          disabled={!isSurveyCompleted}
+          className={
+            isSurveyCompleted
+              ? 'bg-blue-600 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800'
+              : 'pointer-events-none bg-gray-200 px-6 py-3 text-sm font-medium text-gray-400'
+          }
+          type="button"
+        />
+      </div>
 
       {/* 그리드 뷰 */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">

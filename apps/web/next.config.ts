@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      new URL('https://hdi-s3.s3.ap-northeast-2.amazonaws.com/VI/**'),
+      new URL('https://hdi-s3.s3.ap-northeast-2.amazonaws.com/**'),
     ],
   },
 };
