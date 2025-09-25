@@ -90,3 +90,47 @@ export type ProductSurveyQuestion = z.infer<typeof ProductSurveyQuestionSchema>;
 export type ProductTextSurveyResponse = z.infer<
   typeof ProductTextSurveyResponseSchema
 >;
+
+// ========================
+// 브랜드 설문 상세 스키마
+// ========================
+
+export const BrandDataSetResponseSchema = z.object({
+  name: z.string(),
+  id: z.string(),
+  sectorCategory: z.string(),
+  mainProductCategory: z.string(),
+  mainProduct: z.string(),
+  target: z.string(),
+  referenceUrl: z.url(),
+  image: z.url(),
+});
+
+export const BrandSurveyQuestionSchema = z.object({
+  index: z.int32(),
+  survey: z.string(),
+  response: z.int32(),
+});
+
+export const BrandTextSurveyResponseSchema = z.object({
+  survey: z.string().nullable(),
+  response: z.string().nullable(),
+});
+
+export const BrandSurveyDetailResponseSchema = z.object({
+  brandDataSetResponse: BrandDataSetResponseSchema,
+  brandSurveyResponse: z.object({
+    dataId: z.string(),
+    response: z.array(BrandSurveyQuestionSchema),
+    textResponse: BrandTextSurveyResponseSchema,
+  }),
+});
+
+export type BrandDataSetResponse = z.infer<typeof BrandDataSetResponseSchema>;
+export type BrandSurveyDetailResponse = z.infer<
+  typeof BrandSurveyDetailResponseSchema
+>;
+export type BrandSurveyQuestion = z.infer<typeof BrandSurveyQuestionSchema>;
+export type BrandTextSurveyResponse = z.infer<
+  typeof BrandTextSurveyResponseSchema
+>;

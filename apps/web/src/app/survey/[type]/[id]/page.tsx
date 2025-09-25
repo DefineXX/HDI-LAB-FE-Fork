@@ -135,15 +135,7 @@ export default function SurveyPage() {
             <p className="text-sm text-gray-600">브랜드 및 제품 상세 정보</p>
           </div>
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6">
-            <ProductInfo
-              id={product.id || ''}
-              brandName={product.productName || product.companyName || ''}
-              division={product.productTypeName || ''}
-              representativeCategory={product.modelName || ''}
-              representativeProduct={product.productName || ''}
-              target={product.size || ''}
-              homepage={product.referenceUrl || ''}
-            />
+            <ProductInfo type={type as 'brand' | 'product'} data={product} />
 
             {/* 제품 이미지들 */}
             {productImages.length > 0 && (
