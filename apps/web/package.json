@@ -13,10 +13,14 @@
   "dependencies": {
     "@hdi/fonts": "workspace:*",
     "@hdi/ui": "workspace:*",
+    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.90.2",
+    "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "next": "^15.4.2",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
     "@hdi/eslint-config": "workspace:*",
