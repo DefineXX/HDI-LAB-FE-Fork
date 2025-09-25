@@ -25,7 +25,7 @@ export default function BrandSurveyCard({ item }: { item: SurveyProduct }) {
       </span>
 
       {/* 이미지 영역 */}
-      <div className="relative mb-3 h-20 w-full overflow-hidden rounded bg-gray-100">
+      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded bg-gray-100">
         <Image
           src={image}
           alt={name}
