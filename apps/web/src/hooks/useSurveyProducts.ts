@@ -22,9 +22,9 @@ export const useProductSurveyDetail = ({
   productResponseId: number | undefined;
 }) => {
   return useQuery({
-    queryKey: ['productSurveyDetail', productResponseId],
+    queryKey: ['surveyDetail', productResponseId],
     queryFn: () =>
-      surveyService.getProductSurveyDetail({
+      surveyService.getSurveyDetail({
         type,
         productResponseId: productResponseId!,
       }),
@@ -52,7 +52,7 @@ export const useSaveSurveyResponse = () => {
     onSuccess: (_, variables) => {
       // 설문 상세 데이터를 다시 fetch하여 최신 상태로 업데이트
       queryClient.invalidateQueries({
-        queryKey: ['productSurveyDetail', variables.productResponseId],
+        queryKey: ['surveyDetail', variables.productResponseId],
       });
     },
     onError: (error) => {
