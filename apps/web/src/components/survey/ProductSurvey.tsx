@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import ProductImage from '@/components/survey/ProductImage';
@@ -10,6 +10,7 @@ import SurveyHeader from '@/components/survey/SurveyHeader';
 import SurveyNavigation from '@/components/survey/SurveyNavigation';
 import SurveyQuestion from '@/components/survey/SurveyQuestion';
 import { useSaveSurveyResponse } from '@/hooks/useSurveyProducts';
+import { UserType } from '@/schemas/auth';
 import {
   type ProductSurveyDetailResponse,
   type ProductSurveyQuestion,
@@ -26,6 +27,8 @@ export default function ProductSurvey({
   detail,
 }: ProductSurveyProps) {
   const router = useRouter();
+  const { type } = useParams();
+  const surveyType = (type as string).toUpperCase() as UserType;
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
@@ -69,6 +72,7 @@ export default function ProductSurvey({
 
     try {
       await saveSurveyResponseMutation.mutateAsync({
+        type: surveyType,
         productResponseId: Number(surveyId),
         requestData: {
           index: Number(questionId),
@@ -93,6 +97,7 @@ export default function ProductSurvey({
 
     try {
       await saveSurveyResponseMutation.mutateAsync({
+        type: surveyType,
         productResponseId: Number(surveyId),
         requestData: {
           index: null,
@@ -140,8 +145,8 @@ export default function ProductSurvey({
         qualitativeAnswer,
       });
 
-      // 가중치 평가 페이지로 이동
-      router.push('/weight-evaluation/product');
+      // 가중치 평가 페이지로 이동 (타입에 따라 동적으로)
+      router.push(`/weight-evaluation/${surveyType.toLowerCase()}`);
     }
   };
 
