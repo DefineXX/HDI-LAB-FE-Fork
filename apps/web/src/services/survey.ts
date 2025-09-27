@@ -157,9 +157,11 @@ export const surveyService = {
    * 설문 응답 저장 (정량 평가 또는 정성 평가)
    */
   async saveSurveyResponse({
+    type,
     productResponseId,
     requestData,
   }: {
+    type: UserType;
     productResponseId: number;
     requestData: SurveyResponseRequest;
   }): Promise<void> {
@@ -170,17 +172,19 @@ export const surveyService = {
       {
         operation: 'SurveyResponseRequest validation',
         additionalInfo: {
+          type,
           productResponseId,
         },
       }
     );
 
     const response = await apiClient.post(
-      `/survey/product/${productResponseId}`,
+      `/survey/${type.toLowerCase()}/${productResponseId}`,
       validatedData
     );
 
     console.log('Survey Response Save:', {
+      type,
       productResponseId,
       requestData: validatedData,
       response: response.data,

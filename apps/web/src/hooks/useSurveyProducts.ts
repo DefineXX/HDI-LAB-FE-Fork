@@ -39,13 +39,16 @@ export const useSaveSurveyResponse = () => {
 
   return useMutation({
     mutationFn: ({
+      type,
       productResponseId,
       requestData,
     }: {
+      type: UserType;
       productResponseId: number;
       requestData: SurveyResponseRequest;
     }) =>
       surveyService.saveSurveyResponse({
+        type,
         productResponseId,
         requestData,
       }),
