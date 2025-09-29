@@ -194,6 +194,29 @@ export const surveyService = {
   },
 
   /**
+   * 설문 제출 (완료)
+   */
+  async submitSurvey({
+    type,
+    responseId,
+  }: {
+    type: UserType;
+    responseId: number;
+  }): Promise<void> {
+    const response = await apiClient.post(
+      `/survey/${type.toLowerCase()}/${responseId}/submit`
+    );
+
+    console.log('Survey Submit:', {
+      type,
+      responseId,
+      response: response.data,
+    });
+
+    return response.data;
+  },
+
+  /**
    * 가중치 평가 점수 제출
    */
   async submitWeightedScores(

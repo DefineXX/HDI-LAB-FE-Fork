@@ -5,6 +5,7 @@ import { SURVEY_INTRODUCTION } from '@/constants/notice';
 
 interface SurveyIntroductionProps {
   className?: string;
+  type?: 'brand' | 'product';
 }
 
 interface RichSegment {
@@ -65,21 +66,22 @@ function renderContentItem(item: ContentItem, index: number): ReactNode {
 
 export default function SurveyIntroduction({
   className = '',
+  type = 'brand',
 }: SurveyIntroductionProps) {
-  const { TITLE, CONTENT, FOOTER } = SURVEY_INTRODUCTION;
+  const { TITLE, CONTENT, FOOTER } = SURVEY_INTRODUCTION[type];
 
   return (
     <div
       className={clsx(
-        'rounded-lg border border-gray-100 bg-white p-8 shadow-sm',
+        'flex flex-col rounded-lg border border-gray-100 bg-white p-8 shadow-sm',
         className
       )}
     >
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto flex max-w-4xl flex-1 flex-col">
         <h1 className="mb-8 text-center text-2xl font-bold text-gray-900">
           {TITLE}
         </h1>
-        <div className="space-y-6 leading-relaxed text-gray-700">
+        <div className="flex-1 space-y-6 leading-relaxed text-gray-700">
           {CONTENT.map((item, index) => (
             <p key={index}>{renderContentItem(item, index)}</p>
           ))}

@@ -7,9 +7,13 @@ import ProductImage from '@/components/survey/ProductImage';
 import ProductInfo from '@/components/survey/ProductInfo';
 import QualitativeEvaluation from '@/components/survey/QualitativeEvaluation';
 import SurveyHeader from '@/components/survey/SurveyHeader';
-import SurveyNavigation from '@/components/survey/SurveyNavigation';
+import SurveyNavigationWithArrows from '@/components/survey/SurveyNavigationWithArrows';
 import SurveyQuestion from '@/components/survey/SurveyQuestion';
-import { useSaveSurveyResponse } from '@/hooks/useSurveyProducts';
+import { useSurveyNavigation } from '@/hooks/useSurveyNavigation';
+import {
+  useSaveSurveyResponse,
+  useSubmitSurvey,
+} from '@/hooks/useSurveyProducts';
 import { UserType } from '@/schemas/auth';
 import {
   type ProductSurveyDetailResponse,
@@ -29,6 +33,16 @@ export default function ProductSurvey({
   const router = useRouter();
   const { type } = useParams();
   const surveyType = (type as string).toUpperCase() as UserType;
+
+  // 설문 네비게이션 훅 사용
+  const {
+    canGoPrevious,
+    canGoNext,
+    goToPrevious,
+    goToNext,
+    currentIndex,
+    totalSurveys,
+  } = useSurveyNavigation();
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
@@ -65,6 +79,9 @@ export default function ProductSurvey({
 
   // 설문 응답 저장 mutation
   const saveSurveyResponseMutation = useSaveSurveyResponse();
+
+  // 설문 제출 mutation
+  const submitSurveyMutation = useSubmitSurvey();
 
   // 정량평가 저장 핸들러
   const handleQuantitativeSave = async (questionId: string, value: number) => {
@@ -135,18 +152,29 @@ export default function ProductSurvey({
     });
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     console.log('제품 설문 평가완료:', { answers, qualitativeAnswer });
 
-    // 설문 진행 상태 저장
-    if (surveyId) {
-      saveSurveyProgress(surveyId, {
-        questionsAnswered: answers,
-        qualitativeAnswer,
+    try {
+      // 설문 제출 API 호출
+      await submitSurveyMutation.mutateAsync({
+        type: surveyType,
+        responseId: Number(surveyId),
       });
 
-      // 가중치 평가 페이지로 이동 (타입에 따라 동적으로)
-      router.push(`/weight-evaluation/${surveyType.toLowerCase()}`);
+      // 설문 진행 상태 저장
+      if (surveyId) {
+        saveSurveyProgress(surveyId, {
+          questionsAnswered: answers,
+          qualitativeAnswer,
+        });
+      }
+
+      // 설문함 페이지로 돌아가기
+      router.push(`/inbox/${surveyType.toLowerCase()}`);
+    } catch (error) {
+      console.error('설문 제출 실패:', error);
+      // 에러 처리 로직 추가 가능
     }
   };
 
@@ -161,11 +189,11 @@ export default function ProductSurvey({
     qualitativeAnswer;
   const isQualitativeValid = currentQualitativeValue.length >= 200;
 
-  // 제품 이미지들을 배열로 모음
+  // 제품 이미지들을 배열로 모음 (정면, 측면, 상세 순서)
   const productImages = [
-    product.detailImagePath,
     product.frontImagePath,
     product.sideImagePath,
+    product.detailImagePath,
   ].filter(
     (imagePath): imagePath is string =>
       imagePath !== null && imagePath !== undefined
@@ -188,13 +216,16 @@ export default function ProductSurvey({
             {/* 제품 이미지들 */}
             {productImages.length > 0 && (
               <div className="space-y-4">
-                {productImages.map((imagePath, index) => (
-                  <ProductImage
-                    key={`product-image-${index}`}
-                    imagePath={imagePath}
-                    label={`이미지 ${index + 1}`}
-                  />
-                ))}
+                {productImages.map((imagePath, index) => {
+                  const labels = ['정면 이미지', '측면 이미지', '상세 이미지'];
+                  return (
+                    <ProductImage
+                      key={`product-image-${index}`}
+                      imagePath={imagePath}
+                      label={labels[index]}
+                    />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -207,7 +238,7 @@ export default function ProductSurvey({
               제품 평가 설문
             </h2>
             <p className="mt-1 text-sm text-gray-600">
-              제품에 대한 평가를 진행해주세요
+              제품 디자인에 대한 평가를 진행해주세요
             </p>
           </div>
 
@@ -215,6 +246,7 @@ export default function ProductSurvey({
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6 pb-8">
             <SurveyHeader
               datasetId={`${surveyId}_${product.productTypeName || ''}`}
+              type="product"
             />
 
             <div className="space-y-8">
@@ -252,9 +284,15 @@ export default function ProductSurvey({
 
           {/* 하단 고정 버튼 영역 */}
           <div className="inset-shadow-sm flex-shrink-0 border-t border-gray-100 bg-gray-50/80 px-6 py-4">
-            <SurveyNavigation
+            <SurveyNavigationWithArrows
               onComplete={handleComplete}
               canComplete={isAllAnswered && isQualitativeValid}
+              onPrevious={goToPrevious}
+              onNext={goToNext}
+              canGoPrevious={canGoPrevious}
+              canGoNext={canGoNext}
+              currentStep={currentIndex + 1}
+              totalSteps={totalSurveys}
             />
           </div>
         </div>

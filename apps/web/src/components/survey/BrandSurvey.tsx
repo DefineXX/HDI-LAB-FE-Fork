@@ -7,9 +7,13 @@ import ProductImage from '@/components/survey/ProductImage';
 import ProductInfo from '@/components/survey/ProductInfo';
 import QualitativeEvaluation from '@/components/survey/QualitativeEvaluation';
 import SurveyHeader from '@/components/survey/SurveyHeader';
-import SurveyNavigation from '@/components/survey/SurveyNavigation';
+import SurveyNavigationWithArrows from '@/components/survey/SurveyNavigationWithArrows';
 import SurveyQuestion from '@/components/survey/SurveyQuestion';
-import { useSaveSurveyResponse } from '@/hooks/useSurveyProducts';
+import { useSurveyNavigation } from '@/hooks/useSurveyNavigation';
+import {
+  useSaveSurveyResponse,
+  useSubmitSurvey,
+} from '@/hooks/useSurveyProducts';
 import { UserType } from '@/schemas/auth';
 import {
   type BrandSurveyDetailResponse,
@@ -26,6 +30,16 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
   const router = useRouter();
   const { type } = useParams();
   const surveyType = (type as string).toUpperCase() as UserType;
+
+  // 설문 네비게이션 훅 사용
+  const {
+    canGoPrevious,
+    canGoNext,
+    goToPrevious,
+    goToNext,
+    currentIndex,
+    totalSurveys,
+  } = useSurveyNavigation();
 
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [qualitativeAnswer, setQualitativeAnswer] = useState<string>('');
@@ -63,6 +77,9 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
   // 설문 응답 저장 mutation
   const saveSurveyResponseMutation = useSaveSurveyResponse();
 
+  // 설문 제출 mutation
+  const submitSurveyMutation = useSubmitSurvey();
+
   // 정량평가 저장 핸들러
   const handleQuantitativeSave = async (questionId: string, value: number) => {
     setSavingQuestions((prev) => new Set(prev).add(questionId));
@@ -70,7 +87,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
     try {
       await saveSurveyResponseMutation.mutateAsync({
         type: surveyType,
-        productResponseId: Number(surveyId),
+        productResponseId: Number(surveyId), // API는 여전히 productResponseId 필드를 사용
         requestData: {
           index: Number(questionId),
           response: value,
@@ -95,7 +112,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
     try {
       await saveSurveyResponseMutation.mutateAsync({
         type: surveyType,
-        productResponseId: Number(surveyId),
+        productResponseId: Number(surveyId), // API는 여전히 productResponseId 필드를 사용
         requestData: {
           index: null,
           response: null,
@@ -132,18 +149,29 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
     });
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     console.log('브랜드 설문 평가완료:', { answers, qualitativeAnswer });
 
-    // 설문 진행 상태 저장
-    if (surveyId) {
-      saveSurveyProgress(surveyId, {
-        questionsAnswered: answers,
-        qualitativeAnswer,
+    try {
+      // 설문 제출 API 호출
+      await submitSurveyMutation.mutateAsync({
+        type: surveyType,
+        responseId: Number(surveyId),
       });
 
-      // 가중치 평가 페이지로 이동 (타입에 따라 동적으로)
-      router.push(`/weight-evaluation/${surveyType.toLowerCase()}`);
+      // 설문 진행 상태 저장
+      if (surveyId) {
+        saveSurveyProgress(surveyId, {
+          questionsAnswered: answers,
+          qualitativeAnswer,
+        });
+      }
+
+      // 설문함 페이지로 돌아가기
+      router.push(`/inbox/${surveyType.toLowerCase()}`);
+    } catch (error) {
+      console.error('설문 제출 실패:', error);
+      // 에러 처리 로직 추가 가능
     }
   };
 
@@ -161,13 +189,13 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
   return (
     <div className="mx-auto h-full px-8 py-6">
       <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* 왼쪽 섹션 - 브랜드 정보 */}
+        {/* 왼쪽 섹션 - 로고 정보 */}
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
             <h2 className="mb-1 text-lg font-semibold text-gray-800">
-              브랜드 정보
+              로고 정보
             </h2>
-            <p className="text-sm text-gray-600">브랜드 상세 정보</p>
+            <p className="text-sm text-gray-600">로고 상세 정보</p>
           </div>
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6">
             <ProductInfo type="brand" data={brand} />
@@ -175,7 +203,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
             {/* 브랜드 이미지 */}
             {brand.image && (
               <div className="space-y-4">
-                <ProductImage imagePath={brand.image} label="브랜드 이미지" />
+                <ProductImage imagePath={brand.image} label="로고 이미지" />
               </div>
             )}
           </div>
@@ -185,7 +213,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-800">
-              브랜드 평가 설문
+              로고 평가 설문
             </h2>
             <p className="mt-1 text-sm text-gray-600">
               로고 디자인에 대한 평가를 진행해주세요
@@ -194,7 +222,10 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
 
           {/* 스크롤 가능한 설문 내용 영역 */}
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6 pb-8">
-            <SurveyHeader datasetId={`${surveyId}_${brand.name}`} />
+            <SurveyHeader
+              datasetId={`${surveyId}_${brand.name}`}
+              type="brand"
+            />
 
             <div className="space-y-8">
               {questions.map((question) => {
@@ -231,9 +262,15 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
 
           {/* 하단 고정 버튼 영역 */}
           <div className="inset-shadow-sm flex-shrink-0 border-t border-gray-100 bg-gray-50/80 px-6 py-4">
-            <SurveyNavigation
+            <SurveyNavigationWithArrows
               onComplete={handleComplete}
               canComplete={isAllAnswered && isQualitativeValid}
+              onPrevious={goToPrevious}
+              onNext={goToNext}
+              canGoPrevious={canGoPrevious}
+              canGoNext={canGoNext}
+              currentStep={currentIndex + 1}
+              totalSteps={totalSurveys}
             />
           </div>
         </div>
