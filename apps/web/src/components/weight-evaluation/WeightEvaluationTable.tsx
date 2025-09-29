@@ -25,6 +25,35 @@ export default function WeightEvaluationTable({
 
   return (
     <div className="flex h-full flex-col space-y-4">
+      {/* 가이드 텍스트 */}
+      <div className="flex-shrink-0 rounded-lg border border-blue-200 bg-blue-50 p-4">
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0">
+            <svg
+              className="h-5 w-5 text-blue-600"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-blue-800">
+              가중치 설정 안내
+            </h3>
+            <p className="mt-1 text-sm text-blue-700">
+              각 평가 요인의 상대적 중요도를 숫자로 입력하거나, 표의 칸에서
+              마우스로 1씩 조정해주세요. 각 제품의 가중치 총합이 반드시 100이
+              되도록 설정해주세요.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* 평가요인 설명 */}
       <div className="flex-shrink-0 space-y-3">
         <h2 className="text-lg font-medium text-gray-800">평가요인 설명</h2>

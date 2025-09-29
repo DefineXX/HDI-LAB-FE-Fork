@@ -22,8 +22,7 @@ export default function QualitativeEvaluation({
   const [characterCount, setCharacterCount] = useState(value.length);
   const [isFocused, setIsFocused] = useState(false);
   const [hasUserInput, setHasUserInput] = useState(false);
-  const minCharacters = 200;
-  const maxCharacters = 500;
+  const minCharacters = 300;
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastInputTimeRef = useRef<number>(0);
 
@@ -63,18 +62,16 @@ export default function QualitativeEvaluation({
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
-    if (newValue.length <= maxCharacters) {
-      setLocalValue(newValue);
-      setCharacterCount(newValue.length);
-      setHasUserInput(true);
-      lastInputTimeRef.current = Date.now();
+    setLocalValue(newValue);
+    setCharacterCount(newValue.length);
+    setHasUserInput(true);
+    lastInputTimeRef.current = Date.now();
 
-      // 부모 컴포넌트에 변경사항 전달
-      onChange(newValue);
+    // 부모 컴포넌트에 변경사항 전달
+    onChange(newValue);
 
-      // 디바운스된 저장 함수 호출
-      debouncedSave(newValue);
-    }
+    // 디바운스된 저장 함수 호출
+    debouncedSave(newValue);
   };
 
   const handleFocus = () => {
@@ -91,7 +88,6 @@ export default function QualitativeEvaluation({
   };
 
   const isMinimumMet = characterCount >= minCharacters;
-  const isOverLimit = characterCount > maxCharacters;
 
   return (
     <div className={clsx('min-h-30 flex gap-4', className)}>
@@ -124,7 +120,7 @@ export default function QualitativeEvaluation({
           </p>
           <p className="text-xs text-gray-500">
             (디자인 8대요소 - 심미성, 조형성, 독창성, 사용성, 기능성, 윤리성,
-            경제성, 목정성을 중심으로 300자 이상)
+            경제성, 목적성을 중심으로 300자 이상)
           </p>
         </section>
 
@@ -136,55 +132,36 @@ export default function QualitativeEvaluation({
             onChange={handleTextChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            placeholder="입력해주세요"
+            placeholder="디자인 8대요소를 바탕으로 평가한 내용의 구체적인 이유를 작성해주세요."
             className={clsx(
               'min-h-30 w-full rounded-lg border px-4 py-3 text-sm',
               'placeholder:text-gray-400 focus:border-transparent focus:outline-none focus:ring-1 focus:ring-blue-500',
               'resize-none transition-all duration-200',
-              isOverLimit
-                ? 'border-red-300 bg-red-50'
-                : isMinimumMet
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-gray-300 bg-white hover:border-gray-400'
+              isMinimumMet
+                ? 'border-green-300 bg-green-50'
+                : 'border-gray-300 bg-white hover:border-gray-400'
             )}
             rows={8}
           />
-
-          {/* Character Counter */}
-          <div className="absolute bottom-3 right-3">
-            <span
-              className={clsx(
-                'rounded px-2 py-1 text-xs font-medium',
-                isOverLimit
-                  ? 'bg-red-100 text-red-600'
-                  : isMinimumMet
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-500'
-              )}
-            >
-              ({characterCount}/{maxCharacters}자)
-            </span>
-          </div>
         </div>
 
         {/* Validation Message */}
         {characterCount > 0 && (
           <div className="space-y-1">
-            {isOverLimit && (
-              <p className="text-xs text-red-600">
-                최대 {maxCharacters}자까지 입력 가능합니다.
-              </p>
-            )}
             {!isMinimumMet && characterCount > 0 && (
-              <p className="text-xs text-orange-600">
-                최소 {minCharacters}자 이상 입력해주세요. (
-                {minCharacters - characterCount}자 더 필요)
-              </p>
+              <div className="flex items-center gap-1 pl-1 text-xs text-orange-600">
+                <div className="h-1 w-1 rounded-full bg-orange-400"></div>
+                <span>
+                  최소 {minCharacters}자 이상 입력해주세요. (
+                  {minCharacters - characterCount}자 더 필요)
+                </span>
+              </div>
             )}
-            {isMinimumMet && !isOverLimit && (
-              <p className="text-xs text-green-600">
-                ✓ 최소 글자 수를 충족했습니다.
-              </p>
+            {isMinimumMet && (
+              <div className="flex items-center gap-2 text-xs text-green-600">
+                <div className="h-1 w-1 rounded-full bg-green-400"></div>
+                <span>✓ 최소 글자 수를 충족했습니다.</span>
+              </div>
             )}
           </div>
         )}
