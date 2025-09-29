@@ -1,0 +1,117 @@
+name: Sync from Organization Repo and Deploy to Vercel
+
+on:
+  # 수동 실행을 위한 워크플로우 디스패치
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Force sync even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+
+  # 스케줄링된 동기화 - 5분마다 체크 (필요에 따라 조정 가능)
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout fork repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/${{ secrets.UPSTREAM_OWNER }}/${{ secrets.UPSTREAM_REPO }}.git
+
+      - name: Fetch upstream changes
+        run: |
+          git fetch upstream main
+
+      - name: Check for updates
+        id: check-updates
+        run: |
+          # 현재 fork의 main 브랜치와 upstream의 main 브랜치 비교
+          LOCAL_HASH=$(git rev-parse HEAD)
+          UPSTREAM_HASH=$(git rev-parse upstream/main)
+
+          echo "Local hash: $LOCAL_HASH"
+          echo "Upstream hash: $UPSTREAM_HASH"
+
+          if [ "$LOCAL_HASH" != "$UPSTREAM_HASH" ] || [ "${{ github.event.inputs.force_sync }}" == "true" ]; then
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "Updates detected or forced sync"
+          else
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "No updates needed"
+          fi
+
+      - name: Sync with upstream
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: |
+          # upstream의 main 브랜치를 현재 fork의 main으로 merge
+          git checkout main
+          git merge upstream/main --no-edit
+
+          # 변경사항이 있는지 확인
+          if git diff --quiet HEAD~1 HEAD; then
+            echo "No actual changes to merge"
+            exit 0
+          fi
+
+          # 변경사항을 fork 저장소에 push
+          git push origin main
+
+      - name: Setup Node.js
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: pnpm install
+
+      - name: Build project
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: pnpm build
+
+      - name: Trigger Vercel deployment
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Send notification
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: |
+          echo "✅ Successfully synced with upstream and triggered Vercel deployment"
+          echo "Upstream hash: $(git rev-parse upstream/main)"
+          echo "Local hash: $(git rev-parse HEAD)"
+
+      - name: Skip notification
+        if: steps.check-updates.outputs.has_updates == 'false'
+        run: |
+          echo "ℹ️ No updates available from upstream repository"
