@@ -127,21 +127,28 @@ export default function SurveyNavigationWithArrows({
         </svg>
       </button>
 
-      {/* 진행 상황 표시 (선택사항) */}
+      {/* 진행 상황 표시 및 현재 위치 정보 */}
       {totalSteps > 1 && (
-        <div className="absolute left-1/2 top-[-40px] flex -translate-x-1/2 transform items-center gap-2">
-          {Array.from({ length: totalSteps }, (_, index) => (
-            <div
-              key={index}
-              className={clsx(
-                'h-2 w-2 rounded-full transition-colors duration-200',
-                {
-                  'bg-blue-500': index + 1 === currentStep,
-                  'bg-gray-300': index + 1 !== currentStep,
-                }
-              )}
-            />
-          ))}
+        <div className="absolute left-1/2 top-[-50px] flex -translate-x-1/2 transform flex-col items-center gap-2">
+          {/* 진행 상황 점들 */}
+          <div className="flex items-center gap-2">
+            {Array.from({ length: totalSteps }, (_, index) => (
+              <div
+                key={index}
+                className={clsx(
+                  'h-2 w-2 rounded-full transition-colors duration-200',
+                  {
+                    'bg-blue-500': index + 1 === currentStep,
+                    'bg-gray-300': index + 1 !== currentStep,
+                  }
+                )}
+              />
+            ))}
+          </div>
+          {/* 현재 위치 텍스트 */}
+          <div className="text-xs text-gray-500">
+            {currentStep} / {totalSteps}
+          </div>
         </div>
       )}
     </div>

@@ -87,7 +87,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
     try {
       await saveSurveyResponseMutation.mutateAsync({
         type: surveyType,
-        productResponseId: Number(surveyId),
+        productResponseId: Number(surveyId), // API는 여전히 productResponseId 필드를 사용
         requestData: {
           index: Number(questionId),
           response: value,
@@ -112,7 +112,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
     try {
       await saveSurveyResponseMutation.mutateAsync({
         type: surveyType,
-        productResponseId: Number(surveyId),
+        productResponseId: Number(surveyId), // API는 여전히 productResponseId 필드를 사용
         requestData: {
           index: null,
           response: null,
