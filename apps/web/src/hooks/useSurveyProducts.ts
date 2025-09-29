@@ -57,6 +57,11 @@ export const useSaveSurveyResponse = () => {
       queryClient.invalidateQueries({
         queryKey: ['surveyDetail', variables.productResponseId],
       });
+
+      // 설문함 데이터도 invalidate하여 최신 상태로 업데이트
+      queryClient.invalidateQueries({
+        queryKey: ['surveyProducts', variables.type],
+      });
     },
     onError: (error) => {
       console.error('설문 응답 저장 실패:', error);
@@ -64,15 +69,52 @@ export const useSaveSurveyResponse = () => {
   });
 };
 
+export const useSubmitSurvey = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      type,
+      responseId,
+    }: {
+      type: UserType;
+      responseId: number;
+    }) =>
+      surveyService.submitSurvey({
+        type,
+        responseId,
+      }),
+    onSuccess: (_, variables) => {
+      // 설문함 데이터를 다시 fetch하여 최신 상태로 업데이트
+      queryClient.invalidateQueries({
+        queryKey: ['surveyProducts', variables.type],
+      });
+
+      // 설문 상세 데이터도 invalidate하여 최신 상태로 업데이트
+      queryClient.invalidateQueries({
+        queryKey: ['surveyDetail', variables.responseId],
+      });
+
+      console.log('설문 제출 성공:', variables);
+    },
+    onError: (error) => {
+      console.error('설문 제출 실패:', error);
+    },
+  });
+};
+
 export const useSubmitWeightedScores = () => {
-  // const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (requestData: WeightedScoreRequestArray) =>
       surveyService.submitWeightedScores(requestData),
     onSuccess: () => {
-      // 가중치 평가 제출 성공 시 관련 쿼리들을 무효화할 수 있음
-      // 필요에 따라 추가적인 캐시 무효화 로직을 구현할 수 있음
+      // 가중치 평가 제출 성공 시 inbox 데이터를 다시 fetch하여 최신 상태로 업데이트
+      queryClient.invalidateQueries({
+        queryKey: ['surveyProducts'],
+      });
+
       console.log('가중치 평가 제출 성공');
     },
     onError: (error) => {

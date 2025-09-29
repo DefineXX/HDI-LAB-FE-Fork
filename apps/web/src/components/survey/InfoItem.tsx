@@ -14,7 +14,7 @@ export default function InfoItem({ label, value, className }: InfoItemProps) {
 
       <div className="flex flex-1">
         <span className="w-40 flex-shrink-0 pt-0.5 font-medium text-gray-600">
-          {label}:
+          {label}
         </span>
         <div className="flex-1 text-gray-900">{value}</div>
       </div>

@@ -3,17 +3,28 @@ import { clsx } from 'clsx';
 interface SurveyHeaderProps {
   datasetId: string;
   className?: string;
+  type?: 'brand' | 'product';
 }
 
 export default function SurveyHeader({
   datasetId,
   className,
+  type = 'product',
 }: SurveyHeaderProps) {
+  const getTitle = () => {
+    switch (type) {
+      case 'brand':
+        return '시각 디자인 해석·평가 AI 개발을 위한 설문지';
+      case 'product':
+        return '제품 디자인 해석·평가 AI 개발을 위한 설문지';
+      default:
+        return '제품 디자인 해석·평가 AI 개발을 위한 설문지';
+    }
+  };
+
   return (
     <div className={clsx('space-y-4', className)}>
-      <h2 className="text-xl font-semibold text-gray-900">
-        제품 디자인 해석·평가 AI 개발을 위한 설문지
-      </h2>
+      <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
 
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-gray-600">데이터셋 ID:</span>

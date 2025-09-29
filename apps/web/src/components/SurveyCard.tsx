@@ -10,7 +10,7 @@ import {
 } from '@/constants/survey';
 import type { SurveyProduct } from '@/schemas/survey';
 
-export default function BrandSurveyCard({ item }: { item: SurveyProduct }) {
+export default function SurveyCard({ item }: { item: SurveyProduct }) {
   const { name, image, responseId, responseStatus } = item;
   const { type } = useParams();
 
@@ -24,8 +24,8 @@ export default function BrandSurveyCard({ item }: { item: SurveyProduct }) {
         {numberLabel}
       </span>
 
-      {/* 이미지 영역 */}
-      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded bg-gray-100">
+      {/* 이미지 영역 - 4:3 비율로 변경 */}
+      <div className="relative mb-3 aspect-[4/3] w-full overflow-hidden rounded bg-gray-100">
         <Image
           src={image}
           alt={name}
