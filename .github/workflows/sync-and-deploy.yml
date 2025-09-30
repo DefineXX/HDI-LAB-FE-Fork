@@ -79,18 +79,18 @@ jobs:
           # 변경사항을 fork 저장소에 push
           git push origin main
 
+      - name: Install pnpm
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Setup Node.js
         if: steps.check-updates.outputs.has_updates == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
-
-      - name: Install pnpm
-        if: steps.check-updates.outputs.has_updates == 'true'
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
 
       - name: Install dependencies
         if: steps.check-updates.outputs.has_updates == 'true'
