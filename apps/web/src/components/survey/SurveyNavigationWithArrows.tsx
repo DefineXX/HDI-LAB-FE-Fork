@@ -83,11 +83,10 @@ export default function SurveyNavigationWithArrows({
           onClick={onComplete}
           disabled={!canComplete}
           className={clsx(
-            'rounded-lg px-6 py-3 text-sm font-medium text-white transition-colors duration-200',
+            'rounded-lg px-6 py-3 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
             {
-              'bg-slate-500 hover:bg-slate-600 active:bg-slate-700':
-                canComplete,
-              'cursor-not-allowed bg-gray-300 text-gray-400': !canComplete,
+              'bg-blue-600 text-white hover:bg-blue-700': canComplete,
+              'cursor-not-allowed bg-gray-300 text-gray-500': !canComplete,
             }
           )}
         >

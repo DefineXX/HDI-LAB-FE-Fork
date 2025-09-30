@@ -11,7 +11,9 @@ import {
   type SurveyResponseRequest,
 } from '@/schemas/survey';
 import {
+  WeightedScoreApiResponseSchema,
   WeightedScoreRequestArraySchema,
+  type WeightedScoreApiResponse,
   type WeightedScoreRequestArray,
 } from '@/schemas/weight-evaluation';
 import { analyzeDataStructure, safeZodParse } from '@/utils/zod';
@@ -214,6 +216,23 @@ export const surveyService = {
     });
 
     return response.data;
+  },
+
+  /**
+   * 가중치 평가 점수 조회
+   */
+  async getWeightedScores(): Promise<WeightedScoreApiResponse> {
+    const response = await apiClient.get('/survey/scores/weighted');
+
+    console.log('Weighted Scores Response:', response.data);
+
+    // Zod 스키마로 응답 검증
+    return safeZodParse(WeightedScoreApiResponseSchema, response.data, {
+      operation: 'WeightedScoreApiResponse validation',
+      additionalInfo: {
+        url: '/survey/scores/weighted',
+      },
+    });
   },
 
   /**
