@@ -191,12 +191,12 @@ export const SURVEY_INTRODUCTION = {
 export const EMERGENCY_CONTACT = {
   brand: {
     TITLE: '비상 연락망',
-    EMAIL: 'hdiilab01@gmail.com',
+    EMAIL: 'hdilab01@gmail.com',
     EMAIL_LABEL: '비상연락망:',
   },
   product: {
     TITLE: '비상 연락망',
-    EMAIL: 'hdiilab01@gmail.com',
+    EMAIL: 'hdilab01@gmail.com',
     EMAIL_LABEL: '비상연락망:',
   },
 } as const;
