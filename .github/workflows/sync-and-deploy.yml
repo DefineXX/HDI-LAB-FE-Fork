@@ -22,6 +22,10 @@ jobs:
   sync-and-deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pull-requests: read
+
     steps:
       - name: Checkout fork repository
         uses: actions/checkout@v4
@@ -36,6 +40,10 @@ jobs:
 
       - name: Add upstream remote
         run: |
+          # upstream remote가 이미 있는지 확인하고 제거
+          if git remote | grep -q upstream; then
+            git remote remove upstream
+          fi
           git remote add upstream https://github.com/${{ secrets.UPSTREAM_OWNER }}/${{ secrets.UPSTREAM_REPO }}.git
 
       - name: Fetch upstream changes
@@ -63,16 +71,32 @@ jobs:
       - name: Sync with upstream
         if: steps.check-updates.outputs.has_updates == 'true'
         run: |
+          # 현재 브랜치 확인 및 main으로 전환
+          CURRENT_BRANCH=$(git branch --show-current)
+          echo "Current branch: $CURRENT_BRANCH"
+
+          if [ "$CURRENT_BRANCH" != "main" ]; then
+            git checkout main
+          fi
+
+          # merge 전 상태 저장
+          PREVIOUS_HASH=$(git rev-parse HEAD)
+          echo "Previous hash: $PREVIOUS_HASH"
+
           # upstream의 main 브랜치를 현재 fork의 main으로 merge
-          git checkout main
           git merge upstream/main --no-edit
 
-          # 변경사항이 있는지 확인
-          if git diff --quiet HEAD~1 HEAD; then
+          # merge 후 상태 확인
+          CURRENT_HASH=$(git rev-parse HEAD)
+          echo "Current hash: $CURRENT_HASH"
+
+          # 실제로 변경사항이 있었는지 확인
+          if [ "$PREVIOUS_HASH" = "$CURRENT_HASH" ]; then
             echo "No actual changes to merge"
             exit 0
           fi
 
+          echo "Changes detected, pushing to origin..."
           # 변경사항을 fork 저장소에 push
           git push origin main
 
