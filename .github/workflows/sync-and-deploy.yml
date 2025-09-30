@@ -68,7 +68,27 @@ jobs:
         run: |
           # upstream의 main 브랜치를 현재 fork의 main으로 merge
           git checkout main
-          git merge upstream/main --no-edit
+
+          # merge 시도 (conflict 발생 가능)
+          if ! git merge upstream/main --no-edit; then
+            echo "Merge conflict detected, resolving..."
+            
+            # .github/workflows 폴더의 충돌은 fork 버전 유지
+            if git diff --name-only --diff-filter=U | grep -q "^.github/workflows/"; then
+              git checkout --ours .github/workflows/
+              git add .github/workflows/
+            fi
+            
+            # 여전히 충돌이 남아있는지 확인
+            if git diff --name-only --diff-filter=U | grep -q .; then
+              echo "Unresolved conflicts remain:"
+              git diff --name-only --diff-filter=U
+              exit 1
+            fi
+            
+            # 충돌 해결 후 merge commit 생성
+            git commit --no-edit
+          fi
 
           # 변경사항이 있는지 확인
           if git diff --quiet HEAD~1 HEAD; then
