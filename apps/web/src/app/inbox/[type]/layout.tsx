@@ -4,17 +4,20 @@ import SurveyIntroduction from '@/components/ui/SurveyIntroduction';
 
 interface InboxLayoutProps {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     type: string;
-  };
+  }>;
 }
 
-export default function InboxLayout({ children, params }: InboxLayoutProps) {
+export default async function InboxLayout({
+  children,
+  params,
+}: InboxLayoutProps) {
+  // params를 await하여 값을 가져옴
+  const { type } = await params;
+
   // type 파라미터를 'brand' | 'product' 타입으로 변환
-  const surveyType =
-    params.type === 'brand' || params.type === 'product'
-      ? params.type
-      : 'brand'; // 기본값은 brand
+  const surveyType = type === 'brand' || type === 'product' ? type : 'brand'; // 기본값은 brand
 
   return (
     <div className="min-h-screen">
