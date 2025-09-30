@@ -236,7 +236,7 @@ export const surveyService = {
   },
 
   /**
-   * 가중치 평가 점수 제출
+   * 가중치 평가 점수 제출 (수정/등록)
    */
   async submitWeightedScores(
     requestData: WeightedScoreRequestArray
@@ -250,7 +250,7 @@ export const surveyService = {
       }
     );
 
-    const response = await apiClient.post(
+    const response = await apiClient.patch(
       '/survey/scores/weighted',
       validatedData
     );
