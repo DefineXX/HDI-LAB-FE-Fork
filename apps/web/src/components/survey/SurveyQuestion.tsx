@@ -133,17 +133,28 @@ export default function SurveyQuestion({
 
         {/* Rating Scale */}
         <section
-          className="space-y-3 px-8"
+          className="flex items-end justify-center gap-3 px-4 sm:gap-4 md:gap-6"
           role="radiogroup"
           aria-labelledby={`question-${questionId}`}
         >
+          {/* Left Label */}
+          <span className="flex-shrink-0 text-xs text-gray-600">
+            전혀 동의하지 않음
+          </span>
+
           {/* Scale Numbers */}
-          <div className="flex items-center justify-between gap-8">
+          <div className="flex items-center gap-6 sm:gap-7 md:gap-8">
             {options.map((option, index) => (
               <label
                 key={option.value}
                 className="flex cursor-pointer flex-col items-center gap-2"
               >
+                <span
+                  id={`option-${questionId}-${option.value}`}
+                  className="text-xs font-medium text-gray-700"
+                >
+                  {option.value}
+                </span>
                 <input
                   ref={(el) => {
                     radioRefs.current[index] = el;
@@ -159,28 +170,19 @@ export default function SurveyQuestion({
                   aria-describedby={`option-${questionId}-${option.value}`}
                   className={clsx(
                     'h-4 w-4 rounded-full border-2 border-gray-300',
-                    'text-blue-600 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                    'hover:scale-110 hover:border-blue-400',
+                    'text-blue-600 transition-all duration-200',
+                    'hover:scale-105 hover:border-blue-400',
                     value === option.value && 'border-blue-600 bg-blue-600'
                   )}
                 />
-                <span
-                  id={`option-${questionId}-${option.value}`}
-                  className="text-xs font-medium text-gray-700"
-                >
-                  {option.value}
-                </span>
               </label>
             ))}
           </div>
 
-          {/* Helper Text */}
-          <div className="flex justify-between gap-8">
-            <span className="text-[10px] text-gray-400">
-              전혀 동의하지 않음
-            </span>
-            <span className="text-[10px] text-gray-400">매우 동의함</span>
-          </div>
+          {/* Right Label */}
+          <span className="flex-shrink-0 text-xs text-gray-600">
+            매우 동의함
+          </span>
         </section>
       </div>
     </div>

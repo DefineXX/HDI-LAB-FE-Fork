@@ -15,6 +15,7 @@ export const WeightEvaluationCategorySchema = z.enum([
 
 // 가중치 평가 요청 스키마
 export const WeightedScoreRequestSchema = z.object({
+  id: z.number().nullable(), // 수정 시 기존 id, 신규 등록 시 null
   category: WeightEvaluationCategorySchema,
   score1: z.int32(),
   score2: z.int32(),
@@ -31,6 +32,27 @@ export const WeightedScoreRequestArraySchema = z.array(
   WeightedScoreRequestSchema
 );
 
+// 가중치 평가 응답 스키마
+export const WeightedScoreResponseSchema = z.object({
+  id: z.number(),
+  category: WeightEvaluationCategorySchema,
+  score1: z.int32(),
+  score2: z.int32(),
+  score3: z.int32(),
+  score4: z.int32(),
+  score5: z.int32(),
+  score6: z.int32(),
+  score7: z.int32(),
+  score8: z.int32(),
+});
+
+// 가중치 평가 응답 데이터 스키마 (API 응답 구조)
+export const WeightedScoreApiResponseSchema = z.object({
+  status: z.number(),
+  message: z.string(),
+  data: z.array(WeightedScoreResponseSchema),
+});
+
 // 스키마에서 추출한 타입들
 export type WeightEvaluationCategoryType = z.infer<
   typeof WeightEvaluationCategorySchema
@@ -38,4 +60,8 @@ export type WeightEvaluationCategoryType = z.infer<
 export type WeightedScoreRequest = z.infer<typeof WeightedScoreRequestSchema>;
 export type WeightedScoreRequestArray = z.infer<
   typeof WeightedScoreRequestArraySchema
+>;
+export type WeightedScoreResponse = z.infer<typeof WeightedScoreResponseSchema>;
+export type WeightedScoreApiResponse = z.infer<
+  typeof WeightedScoreApiResponseSchema
 >;

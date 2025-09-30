@@ -184,7 +184,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
   const currentQualitativeValue =
     detail.data.brandSurveyResponse?.textResponse?.response ||
     qualitativeAnswer;
-  const isQualitativeValid = currentQualitativeValue.length >= 200;
+  const isQualitativeValid = currentQualitativeValue.length >= 300;
 
   return (
     <div className="mx-auto h-full px-8 py-6">
@@ -223,7 +223,7 @@ export default function BrandSurvey({ surveyId, detail }: BrandSurveyProps) {
           {/* 스크롤 가능한 설문 내용 영역 */}
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6 pb-8">
             <SurveyHeader
-              datasetId={`${surveyId}_${brand.name}`}
+              datasetId={detail.data.brandSurveyResponse.dataId}
               type="brand"
             />
 
