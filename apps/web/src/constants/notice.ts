@@ -1,13 +1,17 @@
+import { HongikUnivLogo } from '@hdi/ui';
+import { StaticImageData } from 'next/image';
+
 // 진행 가이드라인 상수
 interface ProgressStep {
   number: number;
   content: string;
-  note?: string;
+  note?: string | string[];
+  image?: StaticImageData;
 }
 
 export const PROGRESS_GUIDELINES = {
   brand: {
-    TITLE: '진행 가이드 라인',
+    TITLE: '진행 가이드라인',
     STEPS: [
       {
         number: 1,
@@ -17,27 +21,35 @@ export const PROGRESS_GUIDELINES = {
         number: 2,
         content:
           '왼쪽의 디자인 세트를 확인하고, 오른쪽의 디자인 평가 설문을 진행하세요.',
-        note: '*필수 사항: 평가 전 웹사이트 링크를 확인하여 브랜드의 분위기를 파악해주세요.',
+        note: [
+          '*필수 사항: 평가 전 웹사이트 링크를 확인하여 브랜드의 분위기를 파악해주세요.',
+          '*진행 중인 평가는 문항별로 자동 저장되며, 원하는 시점에 이어서 진행할 수 있습니다.',
+        ],
       },
       {
         number: 3,
         content:
           "누락된 평가 항목이 없는지 확인한 후 '평가 완료' 버튼을 클릭하여 제출하세요.",
-        note: "*평가를 일시적으로 중단할 경우 '임시 저장' 버튼을 클릭하세요.",
       },
       {
         number: 4,
         content:
-          "총 50개 평가가 완료되면 '제출하기' 버튼을 클릭하여 가중치 문항에 답하세요.",
+          "좌측 상단 '홍익대학교' 로고를 클릭하면 첫 화면으로 이동 가능합니다.",
+        image: HongikUnivLogo,
       },
       {
         number: 5,
+        content:
+          "총 50개 평가가 완료되면 '제출하기' 버튼을 클릭하여 가중치 문항에 답하세요.",
+      },
+      {
+        number: 6,
         content: "'최종 제출하기' 버튼을 클릭하여 제출을 완료하세요.",
       },
     ] as ProgressStep[],
   },
   product: {
-    TITLE: '진행 가이드 라인',
+    TITLE: '진행 가이드라인',
     STEPS: [
       {
         number: 1,
@@ -47,21 +59,29 @@ export const PROGRESS_GUIDELINES = {
         number: 2,
         content:
           '왼쪽의 디자인 세트를 확인하고, 오른쪽의 디자인 평가 설문을 진행하세요.',
-        note: '*필수 사항: 평가 전 제품 정보를 확인하여 제품의 특성을 파악해주세요.',
+        note: [
+          '*필수 사항: 평가 전 제품 정보를 확인하여 제품의 특성을 파악해주세요.',
+          '*진행 중인 평가는 문항별로 자동 저장되며, 원하는 시점에 이어서 진행할 수 있습니다.',
+        ],
       },
       {
         number: 3,
         content:
           "누락된 평가 항목이 없는지 확인한 후 '평가 완료' 버튼을 클릭하여 제출하세요.",
-        note: "*평가를 일시적으로 중단할 경우 '임시 저장' 버튼을 클릭하세요.",
       },
       {
         number: 4,
         content:
-          "총 50개 평가가 완료되면 '제출하기' 버튼을 클릭하여 가중치 문항에 답하세요.",
+          "좌측 상단 '홍익대학교' 로고를 클릭하면 첫 화면으로 이동 가능합니다.",
+        image: HongikUnivLogo,
       },
       {
         number: 5,
+        content:
+          "총 50개 평가가 완료되면 '제출하기' 버튼을 클릭하여 가중치 문항에 답하세요.",
+      },
+      {
+        number: 6,
         content: "'최종 제출하기' 버튼을 클릭하여 제출을 완료하세요.",
       },
     ] as ProgressStep[],
@@ -106,7 +126,7 @@ export const SURVEY_INTRODUCTION = {
       {
         type: 'text',
         content:
-          '설문은 심미성, 조형성, 독창성, 사용성, 기능성, 윤리성, 경제성, 종합평가의 여덟 가지 평가 지표를 바탕으로 구성되어 있으며, 각 응답은 AI가 다각적인 평가 기준을 학습할 수 있도록 지원합니다.',
+          '설문은 심미성, 조형성, 독창성, 사용성, 기능성, 윤리성, 경제성, 목적성, 종합평가의 아홉 가지 평가 지표를 바탕으로 구성되어 있으며, 각 응답은 AI가 다각적인 평가 기준을 학습할 수 있도록 지원합니다.',
       },
       {
         type: 'text',
@@ -120,7 +140,6 @@ export const SURVEY_INTRODUCTION = {
       },
     ] as ContentItem[],
     FOOTER: {
-      EXPECTED_TIME: '예상소요시간: 디자인 1건 당 15-20분 내외',
       RESEARCH_INSTITUTION: '연구책임기관: 홍익대학교 HDI LAB',
       CONTACT_EMAIL: '문의 메일: hdilab01@gmail.com',
     },
@@ -148,7 +167,7 @@ export const SURVEY_INTRODUCTION = {
       {
         type: 'text',
         content:
-          '설문은 심미성, 조형성, 독창성, 사용성, 기능성, 윤리성, 경제성, 종합평가의 아홉 가지 평가 지표를 바탕으로 구성되어 있으며, 각 응답은 AI가 다각적인 평가 기준을 학습할 수 있도록 지원합니다.',
+          '설문은 심미성, 조형성, 독창성, 사용성, 기능성, 윤리성, 경제성, 목적성, 종합평가의 아홉 가지 평가 지표를 바탕으로 구성되어 있으며, 각 응답은 AI가 다각적인 평가 기준을 학습할 수 있도록 지원합니다.',
       },
       {
         type: 'text',
@@ -162,7 +181,6 @@ export const SURVEY_INTRODUCTION = {
       },
     ] as ContentItem[],
     FOOTER: {
-      EXPECTED_TIME: '예상소요시간: 제품 1건 당 15-20분 내외',
       RESEARCH_INSTITUTION: '연구책임기관: 홍익대학교 HDI LAB',
       CONTACT_EMAIL: '문의 메일: hdilab01@gmail.com',
     },
