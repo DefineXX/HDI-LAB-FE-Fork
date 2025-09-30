@@ -187,7 +187,7 @@ export default function ProductSurvey({
   const currentQualitativeValue =
     detail.data.productSurveyResponse?.textSurveyResponse?.response ||
     qualitativeAnswer;
-  const isQualitativeValid = currentQualitativeValue.length >= 200;
+  const isQualitativeValid = currentQualitativeValue.length >= 300;
 
   // 제품 이미지들을 배열로 모음 (정면, 측면, 상세 순서)
   const productImages = [
@@ -245,7 +245,7 @@ export default function ProductSurvey({
           {/* 스크롤 가능한 설문 내용 영역 */}
           <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400 flex-1 space-y-6 overflow-y-auto p-6 pb-8">
             <SurveyHeader
-              datasetId={`${surveyId}_${product.productTypeName || ''}`}
+              datasetId={detail.data.productDataSetResponse.id}
               type="product"
             />
 

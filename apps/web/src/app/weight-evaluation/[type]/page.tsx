@@ -1,15 +1,21 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import WeightEvaluationHeader from '@/components/weight-evaluation/WeightEvaluationHeader';
 import WeightEvaluationNavigation from '@/components/weight-evaluation/WeightEvaluationNavigation';
 import WeightEvaluationSuccess from '@/components/weight-evaluation/WeightEvaluationSuccess';
 import WeightEvaluationTable from '@/components/weight-evaluation/WeightEvaluationTable';
 
-import { useSubmitWeightedScores } from '@/hooks/useSurveyProducts';
-import { WeightEvaluationCategoryType as ApiCategory } from '@/schemas/weight-evaluation';
+import {
+  useSubmitWeightedScores,
+  useWeightedScores,
+} from '@/hooks/useSurveyProducts';
+import {
+  type WeightedScoreResponse,
+  WeightEvaluationCategoryType as ApiCategory,
+} from '@/schemas/weight-evaluation';
 
 // 타입별 가중치 평가 요소들 정의
 const getWeightEvaluationFactors = (type: 'brand' | 'product') => {
@@ -84,13 +90,21 @@ const getWeightEvaluationFactors = (type: 'brand' | 'product') => {
 };
 
 // 타입별 카테고리 데이터 정의
-const getWeightEvaluationCategories = (type: 'brand' | 'product') => {
+const getWeightEvaluationCategories = (
+  type: 'brand' | 'product'
+): Array<{
+  id: string;
+  name: string;
+  weights: Record<string, number>;
+  responseId?: number;
+}> => {
   const categoryMap: Record<
     string,
     Array<{
       id: string;
       name: string;
       weights: Record<string, number>;
+      responseId?: number;
     }>
   > = {
     brand: [
@@ -169,7 +183,7 @@ const getWeightEvaluationCategories = (type: 'brand' | 'product') => {
     ],
   };
 
-  return categoryMap[type] || categoryMap.brand;
+  return categoryMap[type] ?? categoryMap.brand!;
 };
 
 // 카테고리 ID를 API 카테고리로 매핑하는 함수
@@ -185,12 +199,74 @@ const mapCategoryToApiCategory = (categoryId: string): ApiCategory => {
   return categoryMap[categoryId] || 'COSMETIC';
 };
 
+// API 카테고리를 카테고리 ID로 역매핑하는 함수
+const mapApiCategoryToCategoryId = (apiCategory: ApiCategory): string => {
+  const categoryMap: Record<ApiCategory, string> = {
+    COSMETIC: 'cosmetics',
+    FB: 'fnb',
+    VACUUM_CLEANER: 'vacuum',
+    AIR_PURIFIER: 'airpurifier',
+    HAIR_DRYER: 'hairdryer',
+  };
+
+  return categoryMap[apiCategory] || 'cosmetics';
+};
+
+// API 응답 데이터를 페이지 형식으로 변환하는 함수
+const transformApiDataToCategories = (
+  apiData: WeightedScoreResponse[],
+  evaluationType: 'brand' | 'product'
+) => {
+  const initialCategories = getWeightEvaluationCategories(evaluationType);
+
+  // API 데이터가 없으면 초기 카테고리 반환
+  if (!apiData || apiData.length === 0) {
+    return initialCategories;
+  }
+
+  // API 데이터를 카테고리 형식으로 변환
+  const categoriesMap = new Map(
+    initialCategories.map((cat) => [
+      cat.id,
+      { ...cat, responseId: undefined as number | undefined },
+    ])
+  );
+
+  apiData.forEach((scoreData) => {
+    const categoryId = mapApiCategoryToCategoryId(scoreData.category);
+    const category = categoriesMap.get(categoryId);
+
+    if (category) {
+      const factorKeys = Object.keys(category.weights);
+
+      // 타입 안전성을 위해 각 키의 존재를 확인하며 할당
+      if (factorKeys.length >= 8) {
+        category.weights = {
+          [factorKeys[0]!]: scoreData.score1,
+          [factorKeys[1]!]: scoreData.score2,
+          [factorKeys[2]!]: scoreData.score3,
+          [factorKeys[3]!]: scoreData.score4,
+          [factorKeys[4]!]: scoreData.score5,
+          [factorKeys[5]!]: scoreData.score6,
+          [factorKeys[6]!]: scoreData.score7,
+          [factorKeys[7]!]: scoreData.score8,
+        };
+        // API 응답의 id를 responseId로 저장
+        category.responseId = scoreData.id;
+      }
+    }
+  });
+
+  return Array.from(categoriesMap.values());
+};
+
 // 가중치 데이터를 API 형식으로 변환하는 함수
 const transformWeightsToApiFormat = (
   categories: Array<{
     id: string;
     name: string;
     weights: Record<string, number>;
+    responseId?: number;
   }>
 ) => {
   return categories.map((category) => {
@@ -198,6 +274,7 @@ const transformWeightsToApiFormat = (
     const weights = Object.values(category.weights);
 
     return {
+      id: category.responseId ?? null, // 기존 데이터면 responseId, 신규면 null
       category: apiCategory,
       score1: weights[0] || 0,
       score2: weights[1] || 0,
@@ -228,6 +305,7 @@ export default function WeightEvaluationPage() {
       id: string;
       name: string;
       weights: Record<string, number>;
+      responseId?: number;
     }>
   >(initialCategories || []);
   const [validationErrors, setValidationErrors] = useState<
@@ -235,8 +313,25 @@ export default function WeightEvaluationPage() {
   >({});
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // Query hook으로 가중치 데이터 조회
+  const { data: weightedScoresData, isLoading: isLoadingWeightedScores } =
+    useWeightedScores();
+
   // Mutation hook 사용
   const submitWeightedScoresMutation = useSubmitWeightedScores();
+
+  // 가중치 데이터를 불러와서 초기화
+  useEffect(() => {
+    if (weightedScoresData?.data) {
+      const transformedCategories = transformApiDataToCategories(
+        weightedScoresData.data,
+        evaluationType
+      );
+      if (transformedCategories) {
+        setCategories(transformedCategories);
+      }
+    }
+  }, [weightedScoresData, evaluationType]);
 
   // 가중치 변경 핸들러 - useCallback으로 최적화
   const handleWeightChange = useCallback(
@@ -320,6 +415,120 @@ export default function WeightEvaluationPage() {
               <p className="text-lg text-gray-600">
                 평가 타입이 올바르지 않습니다.
               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 로딩 중일 때
+  if (isLoadingWeightedScores) {
+    const skeletonFactors = Array(8).fill(null);
+    const skeletonCategories =
+      evaluationType === 'brand' ? Array(2).fill(null) : Array(3).fill(null);
+
+    return (
+      <div className="mx-auto h-full px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+          {/* 헤더 스켈레톤 */}
+          <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+            <div className="h-6 w-64 animate-pulse rounded bg-gray-200"></div>
+            <div className="mt-2 h-4 w-96 animate-pulse rounded bg-gray-200"></div>
+
+            {/* 상태 색상 가이드 스켈레톤 */}
+            <div className="mt-3 flex items-center gap-4">
+              <div className="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+              <div className="h-4 w-32 animate-pulse rounded bg-gray-200"></div>
+            </div>
+          </div>
+
+          {/* 메인 콘텐츠 스켈레톤 */}
+          <div className="flex-1 overflow-hidden p-4 sm:p-6">
+            <div className="flex h-full flex-col space-y-4">
+              {/* 가이드 텍스트 스켈레톤 */}
+              <div className="flex-shrink-0 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-start space-x-3">
+                  <div className="h-5 w-5 animate-pulse rounded-full bg-blue-200"></div>
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-32 animate-pulse rounded bg-blue-200"></div>
+                    <div className="h-3 w-full animate-pulse rounded bg-blue-200"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 평가요인 설명 스켈레톤 */}
+              <div className="flex-shrink-0 space-y-3">
+                <div className="h-5 w-32 animate-pulse rounded bg-gray-200"></div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {skeletonFactors.map((_, index) => (
+                    <div
+                      key={index}
+                      className="rounded-lg border border-gray-200 bg-gray-50 p-3"
+                    >
+                      <div className="h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+                      <div className="mt-2 space-y-1">
+                        <div className="h-3 w-full animate-pulse rounded bg-gray-200"></div>
+                        <div className="h-3 w-full animate-pulse rounded bg-gray-200"></div>
+                        <div className="h-3 w-3/4 animate-pulse rounded bg-gray-200"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 가중치 입력 테이블 스켈레톤 */}
+              <div className="flex-1 overflow-hidden">
+                <div className="h-full overflow-auto">
+                  <table className="w-full border-collapse border border-gray-300">
+                    <thead className="sticky top-0 z-10 bg-gray-100">
+                      <tr>
+                        <th className="border border-gray-300 px-2 py-2">
+                          <div className="h-4 w-20 animate-pulse rounded bg-gray-200"></div>
+                        </th>
+                        {skeletonFactors.map((_, index) => (
+                          <th
+                            key={index}
+                            className="border border-gray-300 px-1 py-2"
+                          >
+                            <div className="mx-auto h-3 w-12 animate-pulse rounded bg-gray-200"></div>
+                          </th>
+                        ))}
+                        <th className="border border-gray-300 px-2 py-2">
+                          <div className="mx-auto h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {skeletonCategories.map((_, rowIndex) => (
+                        <tr key={rowIndex}>
+                          <td className="border border-gray-300 px-2 py-2">
+                            <div className="h-4 w-24 animate-pulse rounded bg-gray-200"></div>
+                          </td>
+                          {skeletonFactors.map((_, colIndex) => (
+                            <td
+                              key={colIndex}
+                              className="border border-gray-300 px-1 py-1"
+                            >
+                              <div className="h-8 w-full animate-pulse rounded bg-gray-200"></div>
+                            </td>
+                          ))}
+                          <td className="border border-gray-300 px-2 py-2">
+                            <div className="mx-auto h-4 w-16 animate-pulse rounded bg-gray-200"></div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 하단 네비게이션 스켈레톤 */}
+          <div className="inset-shadow-sm flex-shrink-0 border-t border-gray-100 bg-gray-50/80 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex justify-end">
+              <div className="h-9 w-32 animate-pulse rounded-lg bg-gray-200"></div>
             </div>
           </div>
         </div>

@@ -103,6 +103,15 @@ export const useSubmitSurvey = () => {
   });
 };
 
+export const useWeightedScores = () => {
+  return useQuery({
+    queryKey: ['weightedScores'],
+    queryFn: () => surveyService.getWeightedScores(),
+    staleTime: 5 * 60 * 1000, // 5분간 데이터를 fresh로 유지
+    gcTime: 10 * 60 * 1000, // 10분간 캐시 유지
+  });
+};
+
 export const useSubmitWeightedScores = () => {
   const queryClient = useQueryClient();
 
@@ -110,7 +119,12 @@ export const useSubmitWeightedScores = () => {
     mutationFn: (requestData: WeightedScoreRequestArray) =>
       surveyService.submitWeightedScores(requestData),
     onSuccess: () => {
-      // 가중치 평가 제출 성공 시 inbox 데이터를 다시 fetch하여 최신 상태로 업데이트
+      // 가중치 평가 제출 성공 시 weightedScores 데이터를 다시 fetch하여 최신 상태로 업데이트
+      queryClient.invalidateQueries({
+        queryKey: ['weightedScores'],
+      });
+
+      // inbox 데이터도 갱신
       queryClient.invalidateQueries({
         queryKey: ['surveyProducts'],
       });

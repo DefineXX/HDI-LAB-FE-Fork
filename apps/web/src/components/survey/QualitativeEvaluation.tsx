@@ -42,7 +42,7 @@ export default function QualitativeEvaluation({
       }
 
       debounceTimeoutRef.current = setTimeout(() => {
-        if (onSave && textValue.trim().length > 0 && isFocused) {
+        if (onSave && isFocused) {
           onSave(textValue);
           setHasUserInput(false); // 저장 후 사용자 입력 상태 초기화
         }
@@ -80,8 +80,8 @@ export default function QualitativeEvaluation({
 
   const handleBlur = () => {
     setIsFocused(false);
-    // 포커스를 잃을 때 저장된 값이 있으면 즉시 저장
-    if (hasUserInput && localValue.trim().length > 0 && onSave) {
+    // 포커스를 잃을 때 수정 사항이 있으면 즉시 저장 (빈 문자열 포함)
+    if (hasUserInput && onSave) {
       onSave(localValue);
       setHasUserInput(false);
     }

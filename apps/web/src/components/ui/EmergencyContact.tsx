@@ -30,25 +30,27 @@ export default function EmergencyContact({
   return (
     <div
       className={clsx(
-        'rounded-lg border border-gray-100 bg-white p-6 shadow-sm',
+        'flex flex-col rounded-lg border border-gray-100 bg-white p-6 shadow-sm',
         className
       )}
     >
-      <div className="text-center">
-        <h3 className="mb-2 text-xl font-bold text-gray-900">{TITLE}</h3>
-        <div className="mx-auto mb-4 h-32 w-32">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <h3 className="mb-4 text-lg font-bold text-gray-900 lg:text-xl">
+          {TITLE}
+        </h3>
+        <div className="mx-auto mb-3 h-24 w-24 lg:h-28 lg:w-28">
           <div className="relative h-full w-full">
             <Image
               src={getQRCodeImage()}
               alt={`${type === 'brand' ? '브랜드' : '제품'} 설문 비상연락망 QR`}
               fill
-              sizes="full"
+              sizes="(max-width: 1024px) 96px, 112px"
               priority
             />
           </div>
         </div>
         <div className="text-gray-700">
-          <p className="text-sm">
+          <p className="text-xs lg:text-sm">
             {EMAIL_LABEL}
             <span className="ml-1 font-medium">{EMAIL}</span>
           </p>
