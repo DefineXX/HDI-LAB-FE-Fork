@@ -79,16 +79,16 @@ export default function SurveyIntroduction({
     >
       <div className="mx-auto flex h-full max-w-4xl flex-col justify-between">
         <div>
-          <h1 className="mb-8 text-center text-2xl font-bold text-gray-900">
+          <h1 className="mb-8 text-center text-xl font-bold text-gray-900">
             {TITLE}
           </h1>
-          <div className="space-y-6 leading-relaxed text-gray-700">
+          <div className="space-y-2 text-[15px] leading-normal text-gray-700">
             {CONTENT.map((item, index) => (
               <p key={index}>{renderContentItem(item, index)}</p>
             ))}
           </div>
         </div>
-        <div className="mt-8 border-t border-gray-100 pt-6">
+        <div className="mt-4 border-t border-gray-100 pt-4">
           <div className="flex items-center justify-between gap-4 text-sm text-gray-400">
             <span>{FOOTER.RESEARCH_INSTITUTION}</span>
             <span>{FOOTER.CONTACT_EMAIL}</span>
