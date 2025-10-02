@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       new URL('https://hdi-s3.s3.ap-northeast-2.amazonaws.com/**'),
     ],
+    unoptimized: true,
   },
 };
 

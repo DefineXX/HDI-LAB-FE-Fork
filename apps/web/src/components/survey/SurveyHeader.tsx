@@ -1,13 +1,11 @@
 import { clsx } from 'clsx';
 
 interface SurveyHeaderProps {
-  datasetId: string;
   className?: string;
   type?: 'brand' | 'product';
 }
 
 export default function SurveyHeader({
-  datasetId,
   className,
   type = 'product',
 }: SurveyHeaderProps) {
@@ -25,18 +23,6 @@ export default function SurveyHeader({
   return (
     <div className={clsx('space-y-4', className)}>
       <h2 className="text-xl font-semibold text-gray-900">{getTitle()}</h2>
-
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-gray-600">설문 ID:</span>
-        <span
-          className={clsx(
-            'rounded px-3 py-1 font-mono text-sm',
-            'bg-gray-100 text-gray-900'
-          )}
-        >
-          {datasetId}
-        </span>
-      </div>
 
       <div
         className={clsx('rounded-lg p-4', 'border border-blue-200 bg-blue-50')}

@@ -311,7 +311,7 @@ export default function InboxPage() {
           ) : (
             // 최종 제출 미완료 상태
             <Button
-              text="전체 설문 제출"
+              text="전체 평가 제출"
               onClick={handleSubmitAllSurveys}
               disabled={!isSubmitAllButtonEnabled}
               className={
@@ -327,9 +327,11 @@ export default function InboxPage() {
 
       {/* 그리드 뷰 */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
-        {(data.data as SurveyProduct[]).map((item: SurveyProduct) => (
-          <SurveyCard key={item.responseId} item={item} />
-        ))}
+        {(data.data as SurveyProduct[]).map(
+          (item: SurveyProduct, index: number) => (
+            <SurveyCard key={item.responseId} item={item} index={index} />
+          )
+        )}
       </div>
     </div>
   );
