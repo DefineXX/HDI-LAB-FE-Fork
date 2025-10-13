@@ -27,7 +27,7 @@ export default function SurveyCard({
   const status = responseStatus;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow duration-300 ease-out hover:shadow-md">
+    <div className="rounded-xl border border-gray-200 bg-white p-4 transition-shadow duration-300 ease-out hover:shadow-md">
       {/* 번호 */}
       <span className="mb-3 block text-xs font-medium text-gray-500 sm:text-sm">
         {numberLabel}
@@ -77,7 +77,7 @@ export default function SurveyCard({
       {/* 버튼 */}
       <Link
         href={`/survey/${type}/${responseId}`}
-        className={`block w-full rounded-md px-3 py-2.5 text-center text-[13px] transition-colors md:py-2.5 md:text-sm ${SURVEY_STATUS_BUTTON_STYLES[status]}`}
+        className={`block w-full rounded-lg px-3 py-2.5 text-center text-[13px] transition-colors md:py-2.5 md:text-sm ${SURVEY_STATUS_BUTTON_STYLES[status]}`}
       >
         {SURVEY_STATUS_LABELS[status]}
       </Link>
