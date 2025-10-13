@@ -8,15 +8,17 @@ interface InfoItemProps {
 
 export default function InfoItem({ label, value, className }: InfoItemProps) {
   return (
-    <div className={clsx('flex gap-3', className)}>
+    <div className={clsx('flex min-w-0 gap-3', className)}>
       {/* Vertical bar */}
-      <div className="mt-1 h-5 w-1 flex-shrink-0 rounded-full bg-blue-100" />
+      <div className="mt-1 h-5 w-1 flex-shrink-0 rounded-full bg-blue-50" />
 
-      <div className="flex flex-1">
+      <div className="flex min-w-0 flex-1">
         <span className="w-40 flex-shrink-0 pt-0.5 font-medium text-gray-600">
           {label}
         </span>
-        <div className="flex-1 text-gray-900">{value}</div>
+        <div className="min-w-0 flex-1 overflow-hidden text-gray-900">
+          {value}
+        </div>
       </div>
     </div>
   );
