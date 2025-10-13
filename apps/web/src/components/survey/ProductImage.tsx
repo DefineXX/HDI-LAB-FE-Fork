@@ -17,7 +17,7 @@ export default function ProductImage({
   return (
     <div className={clsx('flex gap-4', className)}>
       {/* Vertical Bar */}
-      <div className="w-1 flex-shrink-0 self-stretch rounded-full bg-blue-100"></div>
+      <div className="w-1 flex-shrink-0 self-stretch rounded-full bg-blue-50"></div>
 
       {/* Image Content */}
       <div className="flex-1 space-y-3">

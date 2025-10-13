@@ -103,9 +103,9 @@ export default function SurveyQuestion({
   };
 
   return (
-    <div className={clsx('min-h-30 flex gap-4', className)}>
+    <div className={clsx('min-h-25 flex gap-4', className)}>
       {/* Vertical Bar */}
-      <div className="w-1 flex-shrink-0 self-stretch rounded-full bg-gray-100"></div>
+      <div className="w-1 flex-shrink-0 self-stretch rounded-full bg-gray-50"></div>
 
       {/* Question Content */}
       <div className="flex-1 space-y-4">
