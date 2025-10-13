@@ -92,7 +92,7 @@ export default function QualitativeEvaluation({
   return (
     <div className={clsx('min-h-30 flex gap-4', className)}>
       {/* Vertical Bar */}
-      <div className="w-1 flex-shrink-0 self-stretch rounded-full bg-gray-100"></div>
+      <div className="w-1 flex-shrink-0 self-stretch rounded-full bg-gray-50"></div>
 
       {/* Content */}
       <div className="flex-1 space-y-4">

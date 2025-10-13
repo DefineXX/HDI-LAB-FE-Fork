@@ -62,6 +62,7 @@ export default function ProductInfo({
                     target="_blank"
                     rel="noopener noreferrer"
                     className={clsx(
+                      'inline-block max-w-full truncate',
                       'text-blue-600 underline',
                       'hover:text-blue-800',
                       'transition-colors duration-200'
@@ -93,6 +94,7 @@ export default function ProductInfo({
                     target="_blank"
                     rel="noopener noreferrer"
                     className={clsx(
+                      'inline-block max-w-full truncate',
                       'text-blue-600 underline',
                       'hover:text-blue-800',
                       'transition-colors duration-200'
