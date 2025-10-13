@@ -34,11 +34,11 @@ export default function EmergencyContact({
         className
       )}
     >
-      <div className="flex flex-1 flex-col items-center justify-center text-center">
+      <div className="flex flex-1 items-center justify-center text-center">
         <h3 className="mb-4 text-lg font-bold text-gray-900 lg:text-xl">
           {TITLE}
         </h3>
-        <div className="mx-auto mb-3 h-24 w-24 lg:h-28 lg:w-28">
+        <div className="mx-auto mb-3 h-20 w-20">
           <div className="relative h-full w-full">
             <Image
               src={getQRCodeImage()}
@@ -50,7 +50,7 @@ export default function EmergencyContact({
           </div>
         </div>
         <div className="text-gray-700">
-          <p className="text-xs lg:text-sm">
+          <p className="text-[13px] lg:text-sm">
             {EMAIL_LABEL}
             <span className="ml-1 font-medium">{EMAIL}</span>
           </p>

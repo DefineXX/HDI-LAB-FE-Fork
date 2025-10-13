@@ -133,17 +133,17 @@ export default function SurveyQuestion({
 
         {/* Rating Scale */}
         <section
-          className="flex items-end justify-center gap-3 px-4 sm:gap-4 md:gap-6"
+          className="flex items-end gap-4 px-4 md:gap-6"
           role="radiogroup"
           aria-labelledby={`question-${questionId}`}
         >
           {/* Left Label */}
-          <span className="flex-shrink-0 text-xs text-gray-600">
+          <span className="flex-shrink-0 text-[11px] text-gray-600 md:text-xs">
             전혀 동의하지 않음
           </span>
 
           {/* Scale Numbers */}
-          <div className="flex items-center gap-6 sm:gap-7 md:gap-8">
+          <div className="flex items-center gap-6 sm:gap-8 md:gap-10">
             {options.map((option, index) => (
               <label
                 key={option.value}
@@ -180,7 +180,7 @@ export default function SurveyQuestion({
           </div>
 
           {/* Right Label */}
-          <span className="flex-shrink-0 text-xs text-gray-600">
+          <span className="flex-shrink-0 text-[11px] text-gray-600 md:text-xs">
             매우 동의함
           </span>
         </section>

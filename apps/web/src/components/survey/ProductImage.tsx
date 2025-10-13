@@ -6,7 +6,6 @@ interface ProductImageProps {
   label?: string;
   className?: string;
   imageClassName?: string;
-  labelClassName?: string;
 }
 
 export default function ProductImage({
@@ -14,7 +13,6 @@ export default function ProductImage({
   label,
   className,
   imageClassName,
-  labelClassName,
 }: ProductImageProps) {
   return (
     <div className={clsx('flex gap-4', className)}>
@@ -36,18 +34,6 @@ export default function ProductImage({
             className="h-auto w-full object-contain"
           />
         </div>
-
-        {/* Label */}
-        {label && (
-          <p
-            className={clsx(
-              'text-sm font-medium text-gray-400',
-              labelClassName
-            )}
-          >
-            {label}
-          </p>
-        )}
       </div>
     </div>
   );
