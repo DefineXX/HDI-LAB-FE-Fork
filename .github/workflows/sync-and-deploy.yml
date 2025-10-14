@@ -14,9 +14,9 @@ on:
         default: false
         type: boolean
 
-  # 스케줄링된 동기화 - 백업용 (30분마다 체크)
+  # 스케줄링된 동기화 - 백업용 (하루에 한번, UTC 00:00 = KST 09:00)
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '0 0 * * *'
 
 permissions:
   contents: write
@@ -26,6 +26,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validate required secrets
+        run: |
+          echo "🔍 Validating required secrets..."
+
+          MISSING_SECRETS=()
+
+          # UPSTREAM secrets 검증
+          if [ -z "${{ secrets.UPSTREAM_OWNER }}" ]; then
+            echo "❌ UPSTREAM_OWNER: Not set"
+            MISSING_SECRETS+=("UPSTREAM_OWNER")
+          else
+            echo "✅ UPSTREAM_OWNER: Set"
+          fi
+
+          if [ -z "${{ secrets.UPSTREAM_REPO }}" ]; then
+            echo "❌ UPSTREAM_REPO: Not set"
+            MISSING_SECRETS+=("UPSTREAM_REPO")
+          else
+            echo "✅ UPSTREAM_REPO: Set"
+          fi
+
+          # PAT_TOKEN 검증
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "❌ PAT_TOKEN: Not set"
+            MISSING_SECRETS+=("PAT_TOKEN")
+          else
+            echo "✅ PAT_TOKEN: Set"
+          fi
+
+          # Vercel secrets 검증
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "❌ VERCEL_TOKEN: Not set"
+            MISSING_SECRETS+=("VERCEL_TOKEN")
+          else
+            echo "✅ VERCEL_TOKEN: Set"
+          fi
+
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "❌ VERCEL_ORG_ID: Not set"
+            MISSING_SECRETS+=("VERCEL_ORG_ID")
+          else
+            echo "✅ VERCEL_ORG_ID: Set"
+          fi
+
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "❌ VERCEL_PROJECT_ID: Not set"
+            MISSING_SECRETS+=("VERCEL_PROJECT_ID")
+          else
+            echo "✅ VERCEL_PROJECT_ID: Set"
+          fi
+
+          # 누락된 secrets가 있으면 워크플로우 실패
+          if [ ${#MISSING_SECRETS[@]} -gt 0 ]; then
+            echo ""
+            echo "🚨 Missing required secrets: ${MISSING_SECRETS[*]}"
+            echo "Please configure these secrets in repository settings."
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ All required secrets are properly configured!"
+
       - name: Checkout fork repository
         uses: actions/checkout@v4
         with:
