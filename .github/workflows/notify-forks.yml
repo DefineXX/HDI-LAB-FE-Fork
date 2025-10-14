@@ -1,0 +1,51 @@
+name: Notify Fork Repositories
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  notify-forks:
+    runs-on: ubuntu-latest
+
+    # PR이 merge된 경우에만 실행
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true || github.event_name == 'push'
+
+    steps:
+      - name: Notify fork repositories
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const forkRepositories = [
+              // 여기에 fork한 저장소들의 정보를 추가하세요
+              // 형식: { owner: 'your-username', repo: 'repository-name' }
+              { owner: '${{ secrets.FORK_OWNER }}', repo: '${{ secrets.FORK_REPO }}' }
+            ];
+
+            for (const fork of forkRepositories) {
+              try {
+                await github.rest.repos.createDispatchEvent({
+                  owner: fork.owner,
+                  repo: fork.repo,
+                  event_type: 'main-updated',
+                  client_payload: {
+                    source_repo: '${{ github.repository }}',
+                    source_branch: '${{ github.ref_name }}',
+                    commit_sha: '${{ github.sha }}',
+                    triggered_by: '${{ github.actor }}',
+                    timestamp: new Date().toISOString()
+                  }
+                });
+                
+                console.log(`✅ Successfully notified ${fork.owner}/${fork.repo}`);
+              } catch (error) {
+                console.error(`❌ Failed to notify ${fork.owner}/${fork.repo}:`, error.message);
+              }
+            }
+
+            console.log('🎉 Fork notification process completed');

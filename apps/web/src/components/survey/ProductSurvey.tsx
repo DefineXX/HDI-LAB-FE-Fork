@@ -204,7 +204,7 @@ export default function ProductSurvey({
       <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-2">
         {/* 왼쪽 섹션 - 제품 정보 */}
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
-          <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
+          <div className="flex-shrink-0 border-b border-gray-200 bg-blue-50 px-6 py-4">
             <h2 className="mb-1 text-lg font-semibold text-gray-800">
               제품 정보
             </h2>
@@ -233,7 +233,7 @@ export default function ProductSurvey({
 
         {/* 오른쪽 섹션 - 설문지 */}
         <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
-          <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4">
+          <div className="flex-shrink-0 border-b border-gray-200 bg-blue-50 px-6 py-4">
             <h2 className="text-lg font-semibold text-gray-800">
               제품 평가 설문
             </h2>

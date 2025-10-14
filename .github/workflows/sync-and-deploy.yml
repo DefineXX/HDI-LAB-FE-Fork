@@ -1,0 +1,206 @@
+name: Sync from Organization Repo and Deploy to Vercel
+
+on:
+  # 원본 저장소에서 webhook으로 알림받을 때 실행
+  repository_dispatch:
+    types: [main-updated]
+
+  # 수동 실행을 위한 워크플로우 디스패치
+  workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Force sync even if no changes detected'
+        required: false
+        default: false
+        type: boolean
+
+  # 스케줄링된 동기화 - 백업용 (하루에 한번, UTC 00:00 = KST 09:00)
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate required secrets
+        run: |
+          echo "🔍 Validating required secrets..."
+
+          MISSING_SECRETS=()
+
+          # UPSTREAM secrets 검증
+          if [ -z "${{ secrets.UPSTREAM_OWNER }}" ]; then
+            echo "❌ UPSTREAM_OWNER: Not set"
+            MISSING_SECRETS+=("UPSTREAM_OWNER")
+          else
+            echo "✅ UPSTREAM_OWNER: Set"
+          fi
+
+          if [ -z "${{ secrets.UPSTREAM_REPO }}" ]; then
+            echo "❌ UPSTREAM_REPO: Not set"
+            MISSING_SECRETS+=("UPSTREAM_REPO")
+          else
+            echo "✅ UPSTREAM_REPO: Set"
+          fi
+
+          # PAT_TOKEN 검증
+          if [ -z "${{ secrets.PAT_TOKEN }}" ]; then
+            echo "❌ PAT_TOKEN: Not set"
+            MISSING_SECRETS+=("PAT_TOKEN")
+          else
+            echo "✅ PAT_TOKEN: Set"
+          fi
+
+          # Vercel secrets 검증
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "❌ VERCEL_TOKEN: Not set"
+            MISSING_SECRETS+=("VERCEL_TOKEN")
+          else
+            echo "✅ VERCEL_TOKEN: Set"
+          fi
+
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then
+            echo "❌ VERCEL_ORG_ID: Not set"
+            MISSING_SECRETS+=("VERCEL_ORG_ID")
+          else
+            echo "✅ VERCEL_ORG_ID: Set"
+          fi
+
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "❌ VERCEL_PROJECT_ID: Not set"
+            MISSING_SECRETS+=("VERCEL_PROJECT_ID")
+          else
+            echo "✅ VERCEL_PROJECT_ID: Set"
+          fi
+
+          # 누락된 secrets가 있으면 워크플로우 실패
+          if [ ${#MISSING_SECRETS[@]} -gt 0 ]; then
+            echo ""
+            echo "🚨 Missing required secrets: ${MISSING_SECRETS[*]}"
+            echo "Please configure these secrets in repository settings."
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ All required secrets are properly configured!"
+
+      - name: Checkout fork repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Add upstream remote
+        run: |
+          git remote add upstream https://github.com/${{ secrets.UPSTREAM_OWNER }}/${{ secrets.UPSTREAM_REPO }}.git
+
+      - name: Fetch upstream changes
+        run: |
+          git fetch upstream main
+
+      - name: Check for updates
+        id: check-updates
+        run: |
+          # 현재 fork의 main 브랜치와 upstream의 main 브랜치 비교
+          LOCAL_HASH=$(git rev-parse HEAD)
+          UPSTREAM_HASH=$(git rev-parse upstream/main)
+
+          echo "Local hash: $LOCAL_HASH"
+          echo "Upstream hash: $UPSTREAM_HASH"
+
+          if [ "$LOCAL_HASH" != "$UPSTREAM_HASH" ] || [ "${{ github.event.inputs.force_sync }}" == "true" ]; then
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+            echo "Updates detected or forced sync"
+          else
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+            echo "No updates needed"
+          fi
+
+      - name: Sync with upstream
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: |
+          # upstream의 main 브랜치를 현재 fork의 main으로 merge
+          git checkout main
+
+          # merge 시도 (conflict 발생 가능)
+          if ! git merge upstream/main --no-edit; then
+            echo "Merge conflict detected, resolving..."
+            
+            # .github/workflows 폴더의 충돌은 fork 버전 유지
+            if git diff --name-only --diff-filter=U | grep -q "^.github/workflows/"; then
+              git checkout --ours .github/workflows/
+              git add .github/workflows/
+            fi
+            
+            # 여전히 충돌이 남아있는지 확인
+            if git diff --name-only --diff-filter=U | grep -q .; then
+              echo "Unresolved conflicts remain:"
+              git diff --name-only --diff-filter=U
+              exit 1
+            fi
+            
+            # 충돌 해결 후 merge commit 생성
+            git commit --no-edit
+          fi
+
+          # 변경사항이 있는지 확인
+          if git diff --quiet HEAD~1 HEAD; then
+            echo "No actual changes to merge"
+            exit 0
+          fi
+
+          # 변경사항을 fork 저장소에 push
+          git push origin main
+
+      - name: Install pnpm
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.17.1
+
+      - name: Setup Node.js
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: pnpm install
+
+      - name: Build project
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: pnpm build
+
+      - name: Trigger Vercel deployment
+        if: steps.check-updates.outputs.has_updates == 'true'
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Send notification
+        if: steps.check-updates.outputs.has_updates == 'true'
+        run: |
+          echo "✅ Successfully synced with upstream and triggered Vercel deployment"
+          echo "Upstream hash: $(git rev-parse upstream/main)"
+          echo "Local hash: $(git rev-parse HEAD)"
+
+      - name: Skip notification
+        if: steps.check-updates.outputs.has_updates == 'false'
+        run: |
+          echo "ℹ️ No updates available from upstream repository"

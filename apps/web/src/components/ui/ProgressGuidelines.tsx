@@ -61,7 +61,7 @@ export default function ProgressGuidelines({
                 key={step.number}
                 className="flex items-start space-x-2 sm:space-x-3"
               >
-                <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-lg bg-blue-500 text-xs font-medium text-white sm:h-6 sm:w-6 sm:text-[13px]">
+                <span className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-md bg-blue-500 text-[11px] font-medium text-white sm:h-5 sm:w-5 sm:text-xs">
                   {step.number}
                 </span>
                 <div className="text-sm text-gray-700 sm:text-[15px]">
