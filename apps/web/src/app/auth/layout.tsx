@@ -6,9 +6,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-8">
+    <div className="flex min-h-screen flex-col items-center justify-between p-8 pb-12 pt-12">
+      <div className="flex-1" />
       {children}
-      <ResearchPartners className="absolute bottom-12" />
+      <div className="flex-1" />
+      <ResearchPartners />
     </div>
   );
 }

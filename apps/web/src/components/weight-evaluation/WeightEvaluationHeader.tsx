@@ -24,7 +24,7 @@ export default function WeightEvaluationHeader({
   const { title, description } = getHeaderContent();
 
   return (
-    <div className="flex-shrink-0 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+    <div className="flex-shrink-0 border-b border-gray-200 bg-blue-50 px-6 py-4">
       <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
       <p className="mt-1 text-sm text-gray-600">{description}</p>
 
