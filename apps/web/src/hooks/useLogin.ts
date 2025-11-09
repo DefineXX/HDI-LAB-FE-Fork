@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 import { LoginRequest, LoginResponse } from '@/schemas/auth';
-import { login } from '@/services/auth';
+import { getMe, login } from '@/services/auth';
 import { deleteCookie } from '@/utils/cookies';
 
 export const useLogin = () => {
@@ -11,7 +11,7 @@ export const useLogin = () => {
 
   return useMutation<LoginResponse, Error, LoginRequest>({
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log('✅ 로그인 성공:', data);
 
       // 로그인 성공 직후 쿠키 상태 확인
@@ -29,6 +29,19 @@ export const useLogin = () => {
         data: data.data,
       });
       console.log('✅ 사용자 정보 캐시에 직접 설정 완료');
+
+      try {
+        // 서버 세션이 실제로 활성화되었는지 재검증
+        await queryClient.fetchQuery({
+          queryKey: ['me'],
+          queryFn: getMe,
+          staleTime: 0,
+        });
+        console.log('🔄 서버 세션 동기화 완료');
+      } catch (error) {
+        console.error('⚠️ 로그인 후 사용자 정보 재검증 실패:', error);
+        return;
+      }
 
       // 성공 후 inbox로 리다이렉트
       router.push(`/inbox/${data.data.userType.toLowerCase()}`);
